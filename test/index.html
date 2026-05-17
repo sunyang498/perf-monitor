@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>性能监控 SDK 测试页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        button {
+            display: block;
+            margin: 10px 0;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+
+        .large-image {
+            width: 100%;
+            max-width: 800px;
+            height: auto;
+            display: block;
+            margin: 20px 0;
+        }
+
+        #dynamic-area {
+            height: 50px;
+            background: #f0f0f0;
+            margin: 20px 0;
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>perf-monitor 测试页面</h1>
+    <p>打开浏览器控制台查看 SDK 日志，并确保启动了上报接收服务器。</p>
+
+    <!-- 触发 LCP：一张大图 -->
+    <img class="large-image" src="https://picsum.photos/800/600" alt="测试大图">
+
+    <hr>
+
+    <!-- 触发 FID + 长任务：点击后执行一段阻塞代码 -->
+    <button id="btn-fid">触发 FID（点击后主线程阻塞 300ms）</button>
+
+    <!-- 触发 CLS：动态插入一个元素 -->
+    <button id="btn-cls">触发 CLS（在图片上方插入文字）</button>
+
+    <!-- 触发 JS 运行时错误 -->
+    <button id="btn-error">触发 JS 错误</button>
+
+    <!-- 触发资源加载错误 -->
+    <button id="btn-resource-error">触发资源加载错误</button>
+
+    <!-- 触发 Promise 未处理异常 -->
+    <button id="btn-promise-error">触发 Promise 异常</button>
+
+    <!-- 动态内容区域 -->
+    <div id="dynamic-area"></div>
+
+    <!-- 引入打包后的 SDK -->
+    <script src="../dist/perf-monitor.js"></script>
+    <script>
+        // 初始化 SDK（假设已打包为 umd，全局变量 PerfMonitor）
+        if (window.PerfMonitor) {
+            PerfMonitor.init({
+                url: 'http://localhost:3001/report', // 你的上报接口地址
+                batchSize: 5,
+                flushInterval: 5000,
+                errorDedupWindow: 10000,
+                debug: true // 开启调试日志，方便在控制台看到上报内容
+            });
+        } else {
+            console.error('PerfMonitor 未加载，请先执行 npm run build');
+        }
+
+        // ========== 模拟各种场景 ==========
+
+        // 1. FID：点击按钮后阻塞主线程 300ms
+        document.getElementById('btn-fid').addEventListener('click', () => {
+            console.log('触发 FID...');
+            const start = Date.now();
+            while (Date.now() - start < 300) { /* 阻塞 */ }
+        });
+
+        // 2. CLS：在图片上方动态插入文字，导致布局偏移
+        document.getElementById('btn-cls').onclick = function () {
+            const div = document.createElement('div');
+            div.textContent = '⚠️ 这是一条突然出现的公告，会把下面的内容挤下去！';
+            div.style.cssText = 'background:#ff6b6b;color:#fff;padding:20px;font-size:18px;margin:10px 0;';
+            const img = document.querySelector('.large-image');
+            img.parentNode.insertBefore(div, img);
+            // ↑ 插入新元素 → 图片位置向下移动 → 触发 layout-shift！
+        };
+
+        // 3. JS 错误
+        document.getElementById('btn-error').addEventListener('click', () => {
+            // 故意使用未定义变量
+            // eslint-disable-next-line
+            console.log(undefinedVar);
+        });
+
+        // 4. 资源加载错误
+        document.getElementById('btn-resource-error').addEventListener('click', () => {
+            const img = document.createElement('img');
+            img.src = 'https://example.com/this-image-does-not-exist.jpg';
+            document.body.appendChild(img);
+            console.log('已创建加载失败的图片...');
+        });
+
+        // 5. Promise 未捕获异常
+        document.getElementById('btn-promise-error').addEventListener('click', () => {
+            Promise.reject('这是一个未处理的 Promise 错误');
+        });
+    </script>
+</body>
+
+</html>

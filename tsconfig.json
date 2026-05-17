@@ -1,0 +1,40 @@
+{
+  "compilerOptions": {
+    // --- 编译目标 ---
+    // ES2017 = ES8，原生支持 async/await，Chrome 58+ / Edge 16+
+    "target": "ES2017",
+
+    // 模块系统交给 Rollup 处理，TS 只保留 ES 模块语法不变
+    "module": "ESNext",
+
+    // 用 Node 模块解析，TS 6.x 需标记为兼容
+    "moduleResolution": "node10",
+    "ignoreDeprecations": "6.0",
+
+    // 生成 .d.ts 类型声明文件，方便接入方获得类型提示
+    "declaration": true,
+
+    // 严格模式全开 — 生产级代码的底线
+    "strict": true,
+
+    // 允许用 import x from 'y' 的方式导入 CommonJS 模块
+    "esModuleInterop": true,
+
+    // 跳过 node_modules 下 .d.ts 的检查，大幅提升编译速度
+    "skipLibCheck": true,
+
+    // 强制文件名大小写一致（Windows 上尤其重要）
+    "forceConsistentCasingInFileNames": true,
+
+    // 编译产物输出的根目录
+    "outDir": "dist",
+
+    // 源码根目录，import 路径从这里开始算
+    "rootDir": "src",
+
+    // 用 tslib 引入 TS helper（__assign, __awaiter 等），减小体积
+    "importHelpers": true
+  },
+  // 仅编译 src 下的文件
+  "include": ["src/**/*"]
+}

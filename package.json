@@ -1,0 +1,28 @@
+{
+  "name": "perf-monitor",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "scripts": {
+    "build": "rollup -c rollup.config.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sunyang498/perf-monitor.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sunyang498/perf-monitor/issues"
+  },
+  "homepage": "https://github.com/sunyang498/perf-monitor#readme",
+  "devDependencies": {
+    "@rollup/plugin-terser": "^1.0.0",
+    "@rollup/plugin-typescript": "^12.3.0",
+    "rollup": "^4.60.4",
+    "tslib": "^2.8.1",
+    "typescript": "^6.0.3"
+  }
+}
