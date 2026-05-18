@@ -1,4 +1,5 @@
 import { ErrorData } from "../types";
+import { addToQueue } from "../transport/queue";
 
 export function listenJSError(): void {
     window.addEventListener('error', (event: Event) => {
@@ -12,11 +13,8 @@ export function listenJSError(): void {
                 stack: event.error?.stack,
                 timestamp: Date.now(),
             };
-            console.log('[perf-monitor] 监听到 JS 错误:', event);
-            console.log('[perf-monitor] 错误采集:', item);
+            addToQueue(item);
         }
-        // TODO: 错误去重
-        // TODO: 错误队列
     }, true);
 }
 
@@ -36,8 +34,7 @@ export function listenResourceError(): void {
             filename: url,
             timestamp: Date.now(),
         };
-        console.log('[perf-monitor] 监听到 Resource 错误:', event);
-        console.log('[perf-monitor] 错误采集:', item);
+        addToQueue(item);
     }, true);
 }
 
@@ -58,7 +55,6 @@ export function listenPromiseError(): void {
             stack,
             timestamp: Date.now(),
         };
-        console.log('[perf-monitor] 监听到 Promise 错误:', event);
-        console.log('[perf-monitor] 错误采集:', item);
+        addToQueue(item);
     });
 }

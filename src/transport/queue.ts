@@ -26,7 +26,7 @@ export function addToQueue(item: TransportItem): void {
     }
 }
 
-function flush(): void {
+export function flush(): void {
     if (queue.length === 0) return;
     const snapshot: TransportItem[] = [...queue];
     queue.length = 0;

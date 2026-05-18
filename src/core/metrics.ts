@@ -1,7 +1,6 @@
-// metrics.ts
+import { addToQueue } from '../transport/queue';
 import type { MetricData } from '../types';
 
-/** 组装一条性能指标数据 */
 function buildMetric(type: MetricData['type'], value: number): MetricData {
     return {
         type,
@@ -16,8 +15,7 @@ export function observeLCP(): void {
         list.getEntries().forEach((entry) => {
             const lcp = entry as unknown as LargestContentfulPaint;
             const item = buildMetric('LCP', lcp.renderTime || lcp.loadTime);
-            console.log('[perf-monitor] LCP 采集:', item);
-            // TODO: 后续交给队列
+            addToQueue(item);
         });
     });
 
@@ -29,17 +27,16 @@ export function observeFID(): void {
         const observer = new PerformanceObserver((list) => {
             const entry = list.getEntries()[0];
             const item = buildMetric('FID', entry.duration);
-            console.log('[perf-monitor] FID 采集:', item);
+            addToQueue(item);
             observer.disconnect();
         });
 
         observer.observe({ type: 'first-input', buffered: false });
     } catch {
-        // 极老浏览器不支持 PerformanceObserver 时，退而查 buffer
         const entries = performance.getEntriesByType('first-input');
         if (entries.length > 0) {
             const item = buildMetric('FID', entries[0].duration);
-            console.log('[perf-monitor] FID 采集（降级）:', item);
+            addToQueue(item);
         }
     }
 }
@@ -55,7 +52,8 @@ export function observeCLS(): void {
             };
             if (cls.hadRecentInput) return;
             clsVal += cls.value;
-            console.log('[perf-monitor] CLS 采集:', clsVal);
+            const item = buildMetric('CLS', clsVal);
+            addToQueue(item);
         });
     });
     observer.observe({ type: 'layout-shift', buffered: true });
