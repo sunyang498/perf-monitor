@@ -2,6 +2,7 @@
 
 import type { PerfMonitorConfig } from './types';
 import { observeLCP, observeFID, observeCLS } from './core/metrics';
+import { listenJSError, listenPromiseError, listenResourceError } from './core/error';
 
 // ============================================================
 // 内部状态
@@ -61,6 +62,9 @@ function init(userConfig: PerfMonitorConfig): void {
     observeLCP()
     observeFID()
     observeCLS()
+    listenJSError()
+    listenPromiseError()
+    listenResourceError()
 }
 
 // ============================================================
