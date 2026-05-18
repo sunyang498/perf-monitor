@@ -1,189 +1,222 @@
-好，决定了我就不废话。下面是完整的技术方案和任务拆解。
+# perf-monitor 开发任务看板
+
+> 从零实现的前端性能监控 SDK，采集 Web 核心指标与运行时错误，支持批量上报、双通道发送、页面卸载兜底与离线补发。
 
 ---
 
-## 🏗️ 整体技术架构
+## ✅ 已完成的模块
 
-```
-┌─────────────────────────────────────────┐
-│           性能监控 SDK (perf-monitor)      │
-├─────────────────────────────────────────┤
-│  核心模块层                               │
-│  ┌─────────┐ ┌──────────┐ ┌──────────┐  │
-│  │ 性能采集 │ │ 错误监控  │ │ 行为追踪  │  │
-│  │ metrics │ │  error   │ │ behavior │  │
-│  └────┬────┘ └────┬─────┘ └────┬─────┘  │
-├───────┼───────────┼────────────┼────────┤
-│  数据处理层                               │
-│  ┌──────────────────────────────────┐    │
-│  │  数据清洗 → 指标计算 → 格式标准化  │    │
-│  └──────────────┬───────────────────┘    │
-├─────────────────┼───────────────────────┤
-│  上报策略层                               │
-│  ┌──────────────────────────────────┐    │
-│  │  批量队列 → 采样/节流 → 发送控制   │    │
-│  └──────────────┬───────────────────┘    │
-├─────────────────┼───────────────────────┤
-│  传输层                                   │
-│  ┌──────────────────────────────────┐    │
-│  │  fetch/beacon → 重试/降级 → 兜底  │    │
-│  └──────────────────────────────────┘    │
-└─────────────────────────────────────────┘
-```
+### 1. 工程化环境搭建
+**文件：** `tsconfig.json` / `rollup.config.js` / `package.json`
 
-**技术栈：** TypeScript + Rollup 打包
+| 维度 | 内容 |
+|---|---|
+| **为何做** | SDK 需要打包为单个 JS 文件供 `<script>` 标签引入。TS 提供类型安全，Rollup 输出干净的无冗余代码。 |
+| **如何做** | TS 配置 `target: ES2017`（原生 async/await）、`module: ESNext`（模块交给 Rollup）；Rollup 输出 IIFE 格式，`name: 'PerfMonitor'` 挂载全局变量；`@rollup/plugin-typescript` + `@rollup/plugin-terser` 编译压缩。 |
+| **效果** | `npm run build` → `dist/perf-monitor.js`，零 warning 构建，用户 `<script>` 引入即可通过 `window.PerfMonitor.init()` 使用。 |
 
-**项目结构：**
-```
-perf-monitor/
-├── src/
-│   ├── index.ts          # 入口 + 初始化
-│   ├── core/
-│   │   ├── metrics.ts    # 性能指标采集
-│   │   ├── error.ts      # 错误监控
-│   │   └── behavior.ts   # 基础行为(可选)
-│   ├── transport/
-│   │   ├── queue.ts      # 上报队列
-│   │   └── sender.ts     # 发送器(fetch/beacon)
-│   ├── utils/
-│   │   ├── helpers.ts    # 工具函数
-│   │   └── constants.ts  # 常量定义
-│   └── types/
-│       └── index.ts      # 类型定义
-├── test/
-│   └── index.html        # 本地测试页面
-├── rollup.config.js
-├── tsconfig.json
-└── package.json
-```
+### 2. 类型体系定义
+**文件：** `src/types/index.ts`
 
----
+| 维度 | 内容 |
+|---|---|
+| **为何做** | 作为"契约层"统一所有模块的数据结构，避免字段名拼错、类型不匹配。 |
+| **如何做** | 定义 `PerfMonitorConfig`（配置）、`MetricData`（指标数据，含 type/value/pageUrl/timestamp）、`ErrorData`（错误数据，含 type/message/filename/lineno/colno/stack）、`TransportItem`（联合类型，队列中统一存放）。 |
+| **效果** | 所有模块 import 同一套类型，编译期即可发现字段遗漏和类型错误。 |
 
-## 📋 完整 TODO 列表（14 天 / 每天 3-4 小时）
+### 3. 入口与初始化 `init()`
+**文件：** `src/index.ts`
 
----
+| 维度 | 内容 |
+|---|---|
+| **为何做** | SDK 需要一个唯一入口点来校验配置、合并默认值、启动所有子模块。 |
+| **如何做** | `init(config)` 校验 `url` 必填 → 合并默认值（`??` 操作符）→ 防重复初始化 → 依次调用 6 个子模块。IIFE 打包后挂载 `window.PerfMonitor`。 |
+| **效果** | `PerfMonitor.init({ url: '/report' })` 一行启动全部监控。 |
 
-### 🔹 阶段一：项目骨架 + 第一个指标跑通（Day 1-2）
+### 4. LCP（最大内容绘制）采集
+**文件：** `src/core/metrics.ts` → `observeLCP()`
 
-| 任务 | 做什么 | 用到的 API / 工具 | 产出 |
-|------|--------|------------------|------|
-| Day 1 | 初始化项目，配 TS + Rollup | `npm init`, `typescript`, `rollup`, `rollup-plugin-typescript2` | 能 `npm run build` 打包出一个 JS 文件 |
-| Day 1 | 写入口结构 + 类型定义 | 无，纯 TS 类型 | `types/index.ts` 定义 `MetricType`, `ReportData` 等接口 |
-| Day 1 | 实现 LCP 采集 | `new PerformanceObserver((list) => {}).observe({ type: 'largest-content-paint', buffered: true })` | 控制台能打印出 LCP 的值 |
-| Day 2 | 实现 FID 采集 | `new PerformanceObserver(...).observe({ type: 'first-input', buffered: true })` | 页面点击后能拿到 FID |
-| Day 2 | 实现 CLS 采集 | `new PerformanceObserver(...).observe({ type: 'layout-shift', buffered: true })` | 能拿到 CLS 累加值 |
-| Day 2 | 统一采集入口 | 封装 `observeMetric()` 函数 | 一个函数统一处理三种指标 |
+| 维度 | 内容 |
+|---|---|
+| **为何做** | LCP 是 Core Web Vitals 三大指标之一，衡量页面主要内容何时对用户可见。 |
+| **如何做** | `PerformanceObserver` 监听 `largest-contentful-paint`，`buffered: true` 防止漏掉 JS 执行前已发生的 LCP 事件。取 `entry.renderTime`（兜底 `loadTime`），组装为 `MetricData`。 |
+| **效果** | 页面加载时自动捕获 LCP，多次更新自动覆盖取终值。 |
 
-**Day 2 结束状态：** 在测试页面加载，控制台能看到 LCP / FID / CLS 的数据打印。
+### 5. FID（首次输入延迟）采集
+**文件：** `src/core/metrics.ts` → `observeFID()`
 
----
+| 维度 | 内容 |
+|---|---|
+| **为何做** | FID 衡量用户首次交互到浏览器响应的延迟，直接反映页面"卡不卡"。 |
+| **如何做** | `PerformanceObserver` 监听 `first-input`（非 `buffered`，因为交互后才能发生）。`entry.duration`（=`processingStart - startTime`）即为 FID 值。`try/catch` 兼容旧浏览器，降级用 `performance.getEntriesByType('first-input')`。回调触发一次后 `disconnect()` 释放资源。 |
+| **效果** | 用户首次点击/按键后自动捕获响应延迟。Firefox 等不支持的浏览器静默降级。 |
 
-### 🔹 阶段二：错误监控（Day 3-4）
+### 6. CLS（累积布局偏移）采集
+**文件：** `src/core/metrics.ts` → `observeCLS()`
 
-| 任务 | 做什么 | 用到的 API / 工具 | 产出 |
-|------|--------|------------------|------|
-| Day 3 | 实现 JS 运行时错误捕获 | `window.addEventListener('error', handler)` | 语法错误、运行时错误能拿到 |
-| Day 3 | 实现资源加载错误捕获 | `window.addEventListener('error', handler, true)` → 注意第三个参数 `true`（捕获阶段） | `<script>`/`<img>` 加载失败能拿到 |
-| Day 3 | 实现 Promise 异常捕获 | `window.addEventListener('unhandledrejection', handler)` | Promise 里抛错能拿到 |
-| Day 4 | 统一错误数据格式 | 把三种错误统一成 `ErrorReportData` 结构 | 错误类型、信息、堆栈、时间戳格式化 |
-| Day 4 | 处理 `crossOrigin` 脚本错误 | 了解 `crossorigin` 属性的作用，处理 "Script error." 问题 | 知道跨域脚本错误的限制和处理方式 |
+| 维度 | 内容 |
+|---|---|
+| **为何做** | CLS 衡量页面视觉稳定性，意外布局偏移严重影响用户体验。 |
+| **如何做** | `PerformanceObserver` 监听 `layout-shift`，`buffered: true`。闭包维护 `clsVal` 累加 `entry.value`。过滤 `hadRecentInput === true`（用户交互 500ms 内引起的偏移不计入）。 |
+| **效果** | 整个页面生命周期中持续累加偏移分数，过滤用户主动触发的偏移。 |
 
-**用到的 API 汇总：**
-- `window.addEventListener('error', fn)` — JS 运行时错误
-- `window.addEventListener('error', fn, true)` — 资源加载错误（注意第三个参数）
-- `window.addEventListener('unhandledrejection', fn)` — Promise 未捕获异常
-- `error.message`, `error.stack`, `error.filename`, `error.lineno`, `error.colno` — 错误信息字段
+### 7. JS 运行时错误监控
+**文件：** `src/core/error.ts` → `listenJSError()`
 
-**Day 4 结束状态：** JS 报错、资源加载失败、Promise 异常都能捕获并统一格式。
+| 维度 | 内容 |
+|---|---|
+| **为何做** | JS 错误直接导致功能不可用，是线上监控的第一优先级。 |
+| **如何做** | `window.addEventListener('error', handler, true)` 捕获阶段监听。用 `event instanceof ErrorEvent` 区分 JS 错误和资源错误。提取 `message/filename/lineno/colno/stack` 组装 `ErrorData`。 |
+| **效果** | 捕获所有未 try/catch 的 JS 运行时错误。 |
 
----
+### 8. 资源加载错误监控
+**文件：** `src/core/error.ts` → `listenResourceError()`
 
-### 🔹 阶段三：上报队列 + 批量发送（Day 5-7）
+| 维度 | 内容 |
+|---|---|
+| **为何做** | `<img>/<script>/<link>` 加载失败不会抛 JS 异常，必须用捕获阶段监听。 |
+| **如何做** | 同一 `window 'error'` 事件，`{ capture: true }` 捕获阶段拦截不冒泡的资源错误。通过 `event.target.tagName` 和 `src/href` 拼出可读消息。 |
+| **效果** | 捕获 404 图片/脚本/CSS，消息格式：`加载 IMG 失败: https://xxx`。 |
 
-| 任务 | 做什么 | 用到的 API / 工具 | 产出 |
-|------|--------|------------------|------|
-| Day 5 | 实现上报队列 | 用数组 `queue: ReportData[]` 存数据 | 每次采集/报错都 `push` 进队列 |
-| Day 5 | 实现批量发送逻辑 | `queue.length >= threshold` 时触发发送；或者用 `requestIdleCallback`/`setTimeout` 定时 flush | 不是每条都立刻发，攒够一批一起发 |
-| Day 6 | 实现 `fetch` 发送 | `fetch(url, { method: 'POST', body: JSON.stringify(queue), headers: {...}, keepalive: true })` | 能把数据发出去 |
-| Day 6 | 实现重试逻辑 | 发送失败后把数据放回队列头部，设置最大重试次数（3次） | 网络波动不丢数据 |
-| Day 7 | 处理数据去重 | 错误类型的数据，相同错误在 N 秒内只上报一次（用 Map 存 key + 时间戳） | 同一个错误不会上报几十次 |
-| Day 7 | 联调测试 | 在测试页面里模拟各种场景，确认上报正常 | 数据能正常发到 mock 接口 |
+### 9. Promise 未捕获异常监控
+**文件：** `src/core/error.ts` → `listenPromiseError()`
 
-**用到的 API / 方法：**
-- `Array.push()` / `Array.splice()` — 队列操作
-- `fetch(url, { keepalive: true })` — 发送请求
-- `setTimeout()` / `requestIdleCallback()` — 定时刷新队列
-- `Map` — 去重缓存
+| 维度 | 内容 |
+|---|---|
+| **为何做** | `Promise.reject()` 无 `.catch()` 的异常不会被 `window.onerror` 捕获。 |
+| **如何做** | `window.addEventListener('unhandledrejection', handler)`。区分 `reason instanceof Error`（取 message/stack）和普通值（`String(reason)`）。 |
+| **效果** | 捕获所有未处理的 Promise reject。 |
 
-**Day 7 结束状态：** 采集到的数据能攒一批发一次，发送失败会重试，错误不会重复上报。
+### 10. 批量上报队列
+**文件：** `src/transport/queue.ts`
+
+| 维度 | 内容 |
+|---|---|
+| **为何做** | 逐条发送 = N 个 HTTP 请求，浪费带宽且可能压垮服务端。批量合并减少请求数。 |
+| **如何做** | 内存数组 `queue` 作为缓冲区。两个触发条件：① `queue.length >= batchSize`（攒够一批）；② `setInterval` 定时器到期。`flush()` 先 `[...queue]` 快照再 `queue.length = 0` 清空，防止异步回调中数据污染。对外暴露 `setupQueue/onFlush/addToQueue`。 |
+| **效果** | 生产者-消费者解耦：采集模块只管 `addToQueue`，不关心怎么发。 |
+
+### 11. 双通道发送器
+**文件：** `src/transport/sender.ts`
+
+| 维度 | 内容 |
+|---|---|
+| **为何做** | 单通道有缺陷：`fetch` 可重试但页面关闭时会中断；`sendBeacon` 可靠但不返回响应状态无法重试。双通道互补。 |
+| **如何做** | `createSender(config)` 工厂函数返回 `send(items)` 闭包。内部：① 错误去重：`Map<key, timestamp>` 记录最近发送时间，`errorDedupWindow` 窗口内相同错误跳过；② `fetch + keepalive: true` 发送；③ 失败递归重试最多 3 次（间隔 1s）；④ 全部失败降级 `navigator.sendBeacon` 兜底。 |
+| **效果** | 正常场景有重试保障，卸载场景有 sendBeacon 兜底，重复错误自动去重。 |
+
+### 12. 类型守卫工具
+**文件：** `src/utils/helper.ts`
+
+| 维度 | 内容 |
+|---|---|
+| **为何做** | `TransportItem = MetricData | ErrorData` 联合类型需要通过类型守卫收窄后才能安全访问各自字段。 |
+| **如何做** | `isMetric(item): item is MetricData` 检查 `type` 是否在 `['LCP','FID','CLS']` 中；`isError(item): item is ErrorData` 同理检查错误类型集合。 |
+| **效果** | sender 中去重逻辑可以安全判断 `isError(item)` 后访问 `item.message`。 |
 
 ---
 
-### 🔹 阶段四：sendBeacon + 页面卸载兜底（Day 8-10）
+## 🔲 待完成的模块
 
-| 任务 | 做什么 | 用到的 API / 工具 | 产出 |
-|------|--------|------------------|------|
-| Day 8 | 实现 `sendBeacon` 发送 | `navigator.sendBeacon(url, JSON.stringify(data))` | 页面卸载时能用 beacon 发数据 |
-| Day 8 | 实现发送策略选择 | 正常用 `fetch`，页面卸载用 `sendBeacon` | 两种发送方式自动切换 |
-| Day 9 | 监听页面卸载事件 | `window.addEventListener('visibilitychange', fn)` + `window.addEventListener('pagehide', fn)` | 页面关闭/隐藏时触发 flush |
-| Day 9 | 实现 `sessionStorage` 兜底 | 页面卸载时如果发送失败，把数据存 `sessionStorage`；下次页面加载时检查并补发 | 极端情况下的兜底 |
-| Day 10 | 处理 `beforeunload` 的坑 | 了解为什么不用 `beforeunload`（浏览器会杀死异步请求），选择 `visibilitychange` + `pagehide` 的原因 | 能讲清楚事件选择的依据 |
-| Day 10 | 测试各种关闭场景 | 关闭标签页、刷新、跳转、浏览器崩溃 | 验证兜底逻辑 |
+### 🔴 优先级 P0（核心链路闭环）
 
-**用到的 API / 事件：**
-- `navigator.sendBeacon(url, data)` — 页面卸载时保证发送
-- `document.addEventListener('visibilitychange', fn)` — 页面可见性变化
-- `window.addEventListener('pagehide', fn)` — 页面隐藏（比 beforeunload 可靠）
-- `sessionStorage.setItem()` / `sessionStorage.getItem()` — 本地暂存
+#### 13. 串联 index.ts：将队列和发送器接入 init
+**文件：** `src/index.ts`
 
-**重要知识点（面试必问）：**
-- `beforeunload` 里发 `fetch` 会被浏览器取消，`sendBeacon` 不会被取消
-- `visibilitychange` + `pagehide` 比 `beforeunload` 更可靠
-- 浏览器 crash 时 `sendBeacon` 也保不住，这是已知局限
+| 维度 | 内容 |
+|---|---|
+| **为何做** | 当前 `metrics.ts` 和 `error.ts` 只 `console.log`，数据没有进入队列→发送链路。 |
+| **如何做** | 在 `init()` 中：① `setupQueue(config)` 初始化队列；② `createSender(config)` 创建发送器；③ `onFlush(sender)` 将发送函数注入队列；④ 修改 `metrics.ts`/`error.ts` 接收一个上报回调参数（或直接 import `addToQueue`），替换 `console.log`。 |
+| **效果** | 采集 → 入队 → 批量发送 → 服务端接收，全链路闭环。 |
+| **预估行数** | ~20 行修改 |
 
-**Day 10 结束状态：** 页面正常关闭/刷新/跳转时数据不丢失，crash 场景知道有局限。
+#### 14. 页面卸载兜底
+**文件：** `src/index.ts` 或新建 `src/core/unload.ts`
+
+| 维度 | 内容 |
+|---|---|
+| **为何做** | 用户关闭标签页时，队列中可能还有未发送的数据。`setInterval` 已失效，必须立即 flush。 |
+| **如何做** | 监听 `visibilitychange`（页面隐藏）和 `pagehide`（页面卸载），触发 `queue.flush()` 立即发送。若 `sendBeacon` 也失败，将数据 `JSON.stringify` 写入 `sessionStorage`，下次页面加载时检测并补发。 |
+| **效果** | 页面关闭不丢数据，sessionStorage 补偿极端场景。 |
+| **预估行数** | ~50 行 |
+
+### 🟡 优先级 P1（服务端 + 可视化）
+
+#### 15. Node.js 上报接收服务
+**文件：** `server/index.js`
+
+| 维度 | 内容 |
+|---|---|
+| **为何做** | 没有接收端就无法验证全链路，面试也无法演示完整流程。 |
+| **如何做** | 最小化 Express 服务（~50 行），`POST /report` 接收 JSON，打印到控制台并追加写入本地 JSON 文件。CORS 开放、速率限制可选。 |
+| **效果** | `npm run server` 启动，SDK 上报数据实时可见，全链路可演示。 |
+| **预估行数** | ~50 行 |
+
+#### 16. 数据可视化面板
+**文件：** `test/dashboard.html`
+
+| 维度 | 内容 |
+|---|---|
+| **为何做** | 面试时能打开浏览器直接看到 LCP/FID/CLS 的实时变化曲线，比任何文字描述都有说服力。 |
+| **如何做** | 纯静态 HTML，使用 Chart.js CDN。定时从服务端拉取 `/report/data` 接口（或被服务端通过 SSE/WebSocket 推送），渲染折线图。三条曲线分别对应 LCP（ms）、FID（ms）、CLS（分数），带阈值参考线（LCP<2500, FID<100, CLS<0.1）。 |
+| **效果** | 面试演示：触发性能问题 → 面板上指标实时劣化 → 直观展示监控价值。 |
+| **预估行数** | ~100 行 |
+
+### 🔵 优先级 P2（技术深度增强）
+
+#### 17. 长任务监控（Long Task）
+**文件：** `src/core/metrics.ts` 新增 `observeLongTask()`
+
+| 维度 | 内容 |
+|---|---|
+| **为何做** | 长任务（>50ms 阻塞主线程）是 FID 恶化的根因。监控长任务是性能诊断的核心手段，且面试官大多不了解这个 API，属于差异化亮点。 |
+| **如何做** | `PerformanceObserver` 监听 `longtask`，`buffered: true`。`entry.duration` 为阻塞时长，`entry.attribution[0]` 可追溯导致长任务的脚本 URL 和容器（iframe）。 |
+| **效果** | 定位"页面为什么卡"的具体代码位置，配合 FID 形成因果链。 |
+| **预估行数** | ~40 行 |
+
+#### 18. 离线队列持久化（IndexedDB）
+**文件：** `src/transport/storage.ts`
+
+| 维度 | 内容 |
+|---|---|
+| **为何做** | 内存队列页面关闭即丢失，用户离线时数据全部浪费。IndexedDB 做持久化是前端存储中最有技术含量的方案，能体现异步事务模型的理解深度。 |
+| **如何做** | 封装 IndexedDB 操作：`openDB` → `saveToDB(items)` → `loadFromDB()` → `clearDB()`。写入策略：每次 flush 成功后清除对应数据；失败则保留。恢复策略：`init()` 时检测 DB 是否有未发送数据，有则补发。存储上限：LRU 淘汰或按时间清理。 |
+| **效果** | 离线/关闭页面不丢数据，下次打开自动补发。面试能聊 IndexedDB 事务、游标、版本迁移。 |
+| **预估行数** | ~80 行 |
+
+#### 19. 数据采样
+**文件：** `src/transport/sampler.ts`
+
+| 维度 | 内容 |
+|---|---|
+| **为何做** | 大流量站点不可能 100% 上报，需要采样降低服务端压力，同时保证统计有效性。 |
+| **如何做** | 哈希采样：用 `hash(userId + pageUrl) % 100 < sampleRate` 决定是否上报，保证同一用户始终在同一采样组（不会忽上忽不上）。分层策略：关键错误 100% 上报，性能指标可配置（如 10%）。 |
+| **效果** | 服务端数据量可控，统计采样结果可外推全量数据。 |
+| **预估行数** | ~40 行 |
+
+### 🟢 优先级 P3（文档与完善）
+
+#### 20. README 设计文档
+**文件：** `README.md`
+
+| 维度 | 内容 |
+|---|---|
+| **为何做** | 面试官 30 秒扫项目，README 是唯一会被仔细看的东西。 |
+| **如何做** | 包含：架构图（ASCII art）、技术选型理由（为什么 Rollup 不用 Webpack、为什么双通道）、核心流程图、使用示例、API 文档。每项决策都写"为什么这样做"。 |
+| **效果** | 简历上的项目链接点进去，面试官 5 秒建立信任。 |
 
 ---
 
-### 🔹 阶段五：完善 + 测试页面 + 面试准备（Day 11-14）
+## 📊 工作量总览
 
-| 任务 | 做什么 | 产出 |
-|------|--------|------|
-| Day 11 | 写一个完整的测试页面 | 页面里有大图（触发 LCP）、按钮点击（触发 FID）、动态插入元素（触发 CLS）、手动抛错、资源加载失败等场景 |
-| Day 11 | 配置一个简单的 mock 后端 | 用 Express 写一个 `/report` 接口接收数据并打印（复用你已有的 Node 技能） |
-| Day 12 | 补充边界处理 | 配置项校验、初始化保护（不重复初始化）、数据长度限制、离线时缓存到 localStorage |
-| Day 12 | 写 README | 项目介绍、使用方式、API 文档、技术选型说明 |
-| Day 13 | 准备面试口述稿 | 3 分钟项目介绍 + 难点/亮点 + 边界处理 + 已知局限 |
-| Day 14 | 模拟面试 | 我扮演面试官问你 SDK 相关的问题，你脱稿回答 |
+| 阶段 | 模块数 | 预估行数 | 状态 |
+|---|---|---|---|
+| 工程化 + 类型体系 | 3 | ~200 | ✅ 完成 |
+| 核心采集（LCP/FID/CLS + 错误） | 6 | ~180 | ✅ 完成 |
+| 上报体系（队列 + 发送器 + 工具） | 3 | ~80 | ✅ 完成 |
+| **P0 闭环串联 + 卸载兜底** | **2** | **~70** | 🔲 待做 |
+| **P1 服务端 + 可视化** | **2** | **~150** | 🔲 待做 |
+| **P2 长任务 + IndexedDB + 采样** | **3** | **~160** | 🔲 待做 |
+| **P3 README** | **1** | **N/A** | 🔲 待做 |
 
-**Day 14 结束状态：** 项目能跑、代码能讲、面试能答。
-
----
-
-## 🛠️ 用到的所有 API 速查表
-
-| 分类 | API | 用途 | 注意事项 |
-|------|-----|------|---------|
-| 性能 | `PerformanceObserver` | 监听性能指标 | 用 `buffered: true` 拿历史数据 |
-| 性能 | `largest-content-paint` | 采集 LCP | LCP 会变化，取最后一次 |
-| 性能 | `first-input` | 采集 FID | 只有用户交互后才触发 |
-| 性能 | `layout-shift` | 采集 CLS | 累加值，需要手动求和 |
-| 错误 | `window.onerror` / `addEventListener('error')` | 捕获 JS 运行时错误 | 拿不到跨域脚本的详细堆栈 |
-| 错误 | `addEventListener('error', fn, true)` | 捕获资源加载错误 | 第三个参数 `true` 表示捕获阶段 |
-| 错误 | `addEventListener('unhandledrejection')` | 捕获 Promise 异常 | 处理未 catch 的 Promise |
-| 发送 | `fetch(url, { keepalive: true })` | 普通发送 | `keepalive` 保证页面跳转时不中断 |
-| 发送 | `navigator.sendBeacon(url, data)` | 卸载时发送 | 数据大小有限制（64KB） |
-| 卸载 | `visibilitychange` | 监听页面可见性 | 比 `beforeunload` 更可靠 |
-| 卸载 | `pagehide` | 页面隐藏 | `beforeunload` 的可靠替代 |
-| 存储 | `sessionStorage` | 暂存失败数据 | 关闭标签页后自动清除 |
-
----
-
-## ⚡ 立刻开始 Day 1
-
-今天要完成：
-
-1. 建项目文件夹 `perf-monitor`
-2. `npm init` → 装 `typescript`, `rollup`, `rollup-plugin-typescript2`
-3. 写最简入口：创建一个 `PerformanceObserver`，监听 `largest-content-paint`，打印结果
-4. 配 Rollup 打包，确认能输出 JS 文件
+**当前已写：~340 行 | 全量预估：~720 行**
