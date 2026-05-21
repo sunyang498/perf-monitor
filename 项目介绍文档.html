@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>perf-monitor 项目介绍 — 团队技术分享</title>
+<style>
+:root { --bg:#0d1117; --card:#161b22; --border:#30363d; --accent:#58a6ff; --text:#c9d1d9; --muted:#8b949e; --green:#3fb950; --red:#f85149; --yellow:#d2991d; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; line-height:1.7; padding:40px 24px; }
+.container { max-width:900px; margin:0 auto; }
+h1 { font-size:2em; color:var(--accent); border-bottom:2px solid var(--border); padding-bottom:12px; margin-bottom:8px; }
+.subtitle { color:var(--muted); margin-bottom:32px; font-size:1em; }
+h2 { font-size:1.35em; color:var(--accent); margin:40px 0 16px; padding-bottom:8px; border-bottom:1px solid var(--border); }
+h3 { font-size:1.1em; color:var(--green); margin:24px 0 10px; }
+.card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:20px 24px; margin:16px 0; }
+.card.highlight { border-color:var(--yellow); }
+pre { background:#0d1117; border:1px solid var(--border); border-radius:6px; padding:14px 18px; overflow-x:auto; font-size:0.85em; margin:12px 0; }
+code { font-family:'Cascadia Code','Fira Code',monospace; font-size:0.9em; }
+.inline-code { background:var(--border); padding:1px 6px; border-radius:3px; font-size:0.88em; }
+table { width:100%; border-collapse:collapse; margin:12px 0; }
+th { text-align:left; padding:8px 12px; background:var(--border); color:var(--accent); font-weight:600; }
+td { padding:8px 12px; border-bottom:1px solid var(--border); }
+.tag { display:inline-block; padding:2px 8px; border-radius:4px; font-size:0.78em; font-weight:bold; margin-right:6px; }
+.tag-red { background:rgba(248,81,73,0.2); color:var(--red); }
+.tag-green { background:rgba(63,185,80,0.2); color:var(--green); }
+.tag-yellow { background:rgba(210,153,29,0.2); color:var(--yellow); }
+.toc { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:16px 24px; margin:20px 0; }
+.toc a { color:var(--accent); text-decoration:none; }
+.toc a:hover { text-decoration:underline; }
+.toc li { margin:4px 0; margin-left:20px; }
+.arch { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:20px; margin:16px 0; font-family:monospace; font-size:0.85em; line-height:1.5; white-space:pre; overflow-x:auto; }
+@media(max-width:640px) { body { padding:20px 12px; } h1 { font-size:1.5em; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>perf-monitor</h1>
+<p class="subtitle">从零实现的前端性能监控 SDK — 团队技术分享</p>
+
+<!-- TOC -->
+<div class="toc">
+<strong>📑 目录</strong>
+<ol>
+<li><a href="#s1">项目背景与目标</a></li>
+<li><a href="#s2">整体架构设计</a></li>
+<li><a href="#s3">核心模块详解</a></li>
+<li><a href="#s4">技术选型与决策</a></li>
+<li><a href="#s5">工程难点：页面卸载数据丢失问题</a></li>
+<li><a href="#s6">TypeScript 类型设计</a></li>
+<li><a href="#s7">扩展规划</a></li>
+</ol>
+</div>
+
+<!-- ====== S1 ====== -->
+<h2 id="s1">一、项目背景与目标</h2>
+
+<div class="card">
+<p><strong>定位：</strong>一个可直接用于生产环境的浏览器性能监控 SDK，以单个 JS 文件形式通过 <code class="inline-code">&lt;script&gt;</code> 标签引入。</p>
+<p><strong>目标：</strong></p>
+<ul>
+<li>采集 Core Web Vitals 三大指标（LCP / FID / CLS）</li>
+<li>监控 JS 运行时错误、资源加载错误、Promise 未捕获异常</li>
+<li>可靠的批量上报链路，覆盖弱网、离线、页面关闭等极端场景</li>
+<li>零依赖打包，<code class="inline-code">window.PerfMonitor.init({...})</code> 一行启动</li>
+</ul>
+</div>
+
+<!-- ====== S2 ====== -->
+<h2 id="s2">二、整体架构设计</h2>
+
+<div class="arch">
+┌─────────────────────────────────────────────────────┐
+│                   perf-monitor SDK                   │
+├─────────────────────────────────────────────────────┤
+│  采集层 (src/core/)                                  │
+│  ┌──────────┐ ┌──────────┐ ┌───────────────────┐   │
+│  │ metrics  │ │  error   │ │     unload         │   │
+│  │ LCP/FID  │ │ jsError  │ │ visibilitychange   │   │
+│  │   /CLS   │ │ resource │ │     pagehide       │   │
+│  └────┬─────┘ └────┬─────┘ └────────┬──────────┘   │
+├───────┼────────────┼───────────────┼───────────────┤
+│  传输层 (src/transport/)            │               │
+│  ┌────┴────────────────────────────┴──────────┐    │
+│  │           queue.ts (批量队列)                │    │
+│  │   双条件触发: batchSize / flushInterval      │    │
+│  └────────────────────┬───────────────────────┘    │
+│                       │                            │
+│  ┌────────────────────┴───────────────────────┐    │
+│  │          sender.ts (双通道发送器)            │    │
+│  │  ┌─ fetch+keepalive → 可重试                │    │
+│  │  └─ sendBeacon → 兜底                        │    │
+│  │  错误去重 · 重试3次 · IndexedDB离线持久化    │    │
+│  └────────────────────┬───────────────────────┘    │
+├───────────────────────┼────────────────────────────┤
+│  持久层 (src/transport/)│                            │
+│  ┌────────────────────┴───────────────────────┐    │
+│  │          storage.ts (IndexedDB)             │    │
+│  │  离线队列 · 启动补发 · LRU淘汰(规划中)       │    │
+│  └────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────┘
+</div>
+
+<h3>数据流向</h3>
+<div class="card">
+<pre><code>用户交互 / 页面加载
+       │
+       ▼
+  采集层 (metrics.ts / error.ts)
+       │ addToQueue(item)
+       ▼
+  队列 (queue.ts)  ──flush()──▶  sender.ts  ──POST──▶  服务端
+       │                            │
+       │                     失败 → saveToDB()
+       │                            │
+       │                     IndexedDB ──init()补发──▶  sender
+       │
+  pagehide → drainQueue() → saveToDB() + sendBeacon()</code></pre>
+</div>
+
+<!-- ====== S3 ====== -->
+<h2 id="s3">三、核心模块详解</h2>
+
+<h3>3.1 性能指标采集 (metrics.ts)</h3>
+<div class="card">
+<table>
+<tr><th>指标</th><th>PerformanceObserver type</th><th>关键处理</th></tr>
+<tr><td>LCP</td><td><code>largest-contentful-paint</code></td><td><code>buffered:true</code> 防漏采；取 <code>renderTime</code> 非 <code>loadTime</code></td></tr>
+<tr><td>FID</td><td><code>first-input</code></td><td>无需 buffered；<code>try/catch</code> 降级到 <code>getEntriesByType</code></td></tr>
+<tr><td>CLS</td><td><code>layout-shift</code></td><td><code>buffered:true</code>；过滤 <code>hadRecentInput</code>；闭包累加 <code>value</code></td></tr>
+</table>
+</div>
+
+<h3>3.2 错误监控 (error.ts)</h3>
+<div class="card">
+<table>
+<tr><th>错误类型</th><th>API</th><th>关键技术点</th></tr>
+<tr><td>JS 运行时</td><td><code>window 'error' + capture</code></td><td><code>event instanceof ErrorEvent</code> 区分</td></tr>
+<tr><td>资源加载</td><td>同上</td><td>资源错误不冒泡，必须 <code>{capture:true}</code>；从 <code>event.target.tagName</code> 提取信息</td></tr>
+<tr><td>Promise</td><td><code>unhandledrejection</code></td><td><code>reason instanceof Error</code> 分支处理</td></tr>
+</table>
+<p style="margin-top:8px;color:var(--muted)">⚠️ 踩坑：资源错误监听中 <code>event</code> 参数被 TS 推断为 <code>ErrorEvent</code>，<code>instanceof ErrorEvent</code> 守卫后 TS 收窄为 <code>never</code>。修复：手动标注 <code>event: Event</code>。</p>
+</div>
+
+<h3>3.3 批量队列 (queue.ts)</h3>
+<div class="card">
+<p><strong>设计：</strong>生产者-消费者模式。采集层只管 <code>addToQueue()</code>，不关心如何发送。</p>
+<ul>
+<li>双触发条件：<code>queue.length >= batchSize</code> 或 <code>setInterval</code> 定时器到期</li>
+<li><code>flush()</code> 先 <code>[...queue]</code> 快照再 <code>queue.length=0</code> 清空，防止异步回调数据污染</li>
+<li>回调注入：<code>onFlush(sender.send)</code> 解耦队列与发送器</li>
+<li><code>drainQueue()</code>：供 pagehide 使用，只快照不清回调</li>
+</ul>
+</div>
+
+<h3>3.4 双通道发送器 (sender.ts)</h3>
+<div class="card">
+<p><strong>状态机设计：</strong></p>
+<pre><code>send(items)
+  ├─ 去重过滤
+  ├─ fetch(keepalive)
+  │    ├─ 成功 → replayStaleData(DB补发) → clearDB
+  │    └─ 失败 → 重试(1s间隔, 最多3次)
+  │              └─ 全失败 → saveToDB → sendBeacon</code></pre>
+<p><strong>为什么双通道：</strong>fetch 可判断 HTTP 状态码、支持重试，但页面关闭时可能中断。sendBeacon 不返回结果但卸载时更可靠——两者互补。</p>
+</div>
+
+<h3>3.5 IndexedDB 离线队列 (storage.ts)</h3>
+<div class="card">
+<p><strong>设计决策：</strong></p>
+<ul>
+<li><strong>批量存：</strong>一个 flush 批次 = 一条 DB 记录（含 items 数组），减少事务开销</li>
+<li><strong>单例缓存：</strong><code>openDB()</code> 缓存 <code>IDBDatabase</code> 实例，避免重复连接</li>
+<li><strong>Promise 封装：</strong>所有事件回调转为 async/await 风格</li>
+<li><strong>resolve 时机：</strong>在 <code>tx.oncomplete</code> 而非 <code>add.onsuccess</code>——保证事务真正提交</li>
+<li><strong>扁平化返回：</strong><code>loadAllFromDB()</code> 将所有记录的 items 合并为一个数组</li>
+</ul>
+</div>
+
+<!-- ====== S4 ====== -->
+<h2 id="s4">四、技术选型与决策</h2>
+
+<div class="card">
+<table>
+<tr><th>选型</th><th>备选方案</th><th>选择理由</th></tr>
+<tr><td>Rollup (IIFE)</td><td>Webpack / esbuild</td><td>天然适合库打包，输出干净无冗余；IIFE 格式用户 script 标签直接引入</td></tr>
+<tr><td>TypeScript ES2017</td><td>ES5 / ES2020</td><td>原生 async/await，不引入 polyfill；PerformanceObserver 最低 Chrome 52</td></tr>
+<tr><td>PerformanceObserver</td><td>定时轮询 getEntries</td><td>事件驱动更低开销，buffered 防漏采</td></tr>
+<tr><td>fetch + sendBeacon</td><td>XHR / img beacon</td><td>fetch 支持 keepalive + 状态码判断；sendBeacon 专为卸载设计</td></tr>
+<tr><td>IndexedDB</td><td>localStorage</td><td>异步不阻塞、容量大、支持结构化数据</td></tr>
+</table>
+</div>
+
+<!-- ====== S5 ====== -->
+<h2 id="s5">五、工程难点：页面卸载时数据丢失</h2>
+
+<div class="card highlight">
+<span class="tag tag-red">架构级问题</span>
+<strong>这是项目开发中遇到的最具挑战性的技术卡点。</strong>
+</div>
+
+<h3>5.1 问题描述</h3>
+<p>用户关闭标签页后，队列中未发送的监控数据永久丢失。IndexedDB 无残留，控制台无异常。</p>
+
+<h3>5.2 根因</h3>
+<p>旧设计中 <code>pagehide</code> 走完整 sender 异步流程：<code>fetch → 失败 → setTimeout 1s → retry × 3 → saveToDB</code>。但浏览器在 pagehide 后立即开始销毁进程，异步操作被取消，<code>saveToDB</code> 永远执行不到。</p>
+
+<h3>5.3 解决方案：双路径分流</h3>
+<div class="card">
+<pre><code>// 改造前：所有场景走同一条路径
+setupUnload(flush)  // flush → sender.send() [async + retry]
+
+// 改造后：场景分流
+setupUnload(
+    flush,                                    // visibilitychange → 正常路径
+    () => {                                   // pagehide → 快速通道
+        const snapshot = drainQueue();
+        saveToDB(snapshot);                   // 立即写 IndexedDB
+        navigator.sendBeacon(url, body);      // 最后尝试发送
+    }
+);</code></pre>
+</div>
+
+<h3>5.4 涉及的关键概念</h3>
+<ul>
+<li>浏览器页面生命周期：<code>visibilitychange</code> vs <code>pagehide</code> 的触发顺序</li>
+<li>异步竞态条件：setTimeout / Promise 在页面销毁时被取消</li>
+<li>keepalive 的局限性：只保单个请求，不保重试链</li>
+<li>IndexedDB 事务在 pagehide 中的特殊待遇</li>
+<li>sendBeacon 的 W3C 设计意图——就是为这个场景设计的</li>
+</ul>
+
+<p style="margin-top:12px">📄 完整分析见 <code>页面卸载解决方案.html</code></p>
+
+<!-- ====== S6 ====== -->
+<h2 id="s6">六、TypeScript 类型设计</h2>
+
+<div class="card">
+<p><strong>判别联合类型（Discriminated Union）：</strong></p>
+<pre><code>type MetricData = { type: 'LCP'|'FID'|'CLS'; value: number; ... }
+type ErrorData  = { type: 'jsError'|'resourceError'|'promiseError'; message: string; ... }
+type TransportItem = MetricData | ErrorData  // 队列统一类型</code></pre>
+<p><strong>类型守卫：</strong></p>
+<pre><code>function isError(item: TransportItem): item is ErrorData { ... }
+function isMetric(item: TransportItem): item is MetricData { ... }</code></pre>
+<p>泛型版本（规划中）：<code>isItemType&lt;T, S&gt;(item, types): item is Extract&lt;T, {type: S[number]}&gt;</code></p>
+</div>
+
+<!-- ====== S7 ====== -->
+<h2 id="s7">七、扩展规划</h2>
+
+<div class="card">
+<table>
+<tr><th>功能</th><th>价值</th><th>难度</th></tr>
+<tr><td><span class="tag tag-yellow">P2</span> 长任务监控 (Long Task)</td><td>定位"页面为什么卡"，配合 FID 形成因果链</td><td>中</td></tr>
+<tr><td><span class="tag tag-yellow">P2</span> 数据采样</td><td>大流量场景控制上报量，哈希保证采样一致性</td><td>中</td></tr>
+<tr><td>数据压缩 (CompressionStream)</td><td>减少带宽占用</td><td>中</td></tr>
+<tr><td>可视化面板</td><td>面试演示，直观感受监控价值</td><td>低</td></tr>
+<tr><td>单元测试 (Vitest)</td><td>保障核心模块可靠性</td><td>中</td></tr>
+</table>
+</div>
+
+<p style="text-align:center;color:var(--muted);margin-top:40px;">perf-monitor · 团队技术分享文档</p>
+
+</div>
+</body>
+</html>

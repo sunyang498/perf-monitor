@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>页面卸载兜底方案 — 性能监控 SDK 项目卡点</title>
+    <style>
+        :root {
+            --bg: #1a1a2e;
+            --card-bg: #16213e;
+            --accent: #e94560;
+            --text: #e0e0e0;
+            --muted: #888;
+            --code-bg: #0f3460;
+            --green: #4ecca3;
+            --yellow: #f0c040;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.8;
+            padding: 40px 20px;
+        }
+        .container { max-width: 960px; margin: 0 auto; }
+        h1 {
+            font-size: 2em;
+            color: var(--accent);
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 12px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            font-size: 1.4em;
+            color: var(--green);
+            margin: 40px 0 16px;
+            position: relative;
+            padding-left: 16px;
+        }
+        h2::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+        }
+        h3 {
+            font-size: 1.1em;
+            color: var(--yellow);
+            margin: 24px 0 10px;
+        }
+        p { margin: 8px 0; color: var(--text); }
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 24px;
+            margin: 16px 0;
+            border-left: 3px solid var(--accent);
+        }
+        .card.good { border-left-color: var(--green); }
+        .card.bad { border-left-color: var(--accent); }
+        .card.warn { border-left-color: var(--yellow); }
+
+        pre {
+            background: var(--code-bg);
+            border-radius: 6px;
+            padding: 16px 20px;
+            overflow-x: auto;
+            font-size: 0.88em;
+            margin: 12px 0;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        code { font-family: 'Cascadia Code', 'Fira Code', monospace; }
+        .tag {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-right: 6px;
+        }
+        .tag-err { background: var(--accent); color: #fff; }
+        .tag-ok { background: var(--green); color: #1a1a2e; }
+        .tag-warn { background: var(--yellow); color: #1a1a2e; }
+
+        .flow {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            margin: 16px 0;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+        .flow-item {
+            background: var(--code-bg);
+            padding: 6px 14px;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+        .flow-arrow { color: var(--accent); font-size: 1.2em; }
+
+        .diff-table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+        .diff-table th {
+            text-align: left;
+            padding: 10px 14px;
+            background: var(--code-bg);
+            color: var(--accent);
+        }
+        .diff-table td {
+            padding: 10px 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .diff-table .old { background: rgba(233,69,96,0.1); }
+        .diff-table .new { background: rgba(78,204,163,0.1); }
+
+        .timeline {
+            padding-left: 24px;
+            border-left: 2px solid var(--accent);
+            margin: 16px 0;
+        }
+        .timeline-item {
+            padding: 8px 0 8px 16px;
+            position: relative;
+        }
+        .timeline-item::before {
+            content: '';
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent);
+            position: absolute;
+            left: -6px;
+            top: 14px;
+        }
+        .timeline-item.green::before { background: var(--green); }
+        .timeline-item.red::before { background: var(--accent); }
+
+        .highlight { color: var(--yellow); }
+        @media (max-width: 640px) {
+            .flow { flex-direction: column; align-items: flex-start; }
+            .flow-arrow { display: none; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+<h1>⚡ 项目卡点：页面卸载时数据丢失</h1>
+
+<div class="card">
+    <strong>所属项目：</strong>perf-monitor（前端性能监控 SDK）<br>
+    <strong>涉及模块：</strong>unload.ts / queue.ts / sender.ts / storage.ts / index.ts<br>
+    <strong>难度等级：</strong>⭐⭐⭐ 架构级<br>
+    <strong>关键词：</strong>pagehide、visibilitychange、IndexedDB、异步竞态、浏览器生命周期
+</div>
+
+<!-- ============================================================ -->
+<h2>一、问题现象</h2>
+
+<div class="card bad">
+    <span class="tag tag-err">BUG</span>
+    <strong>用户关闭标签页后，队列中未发送的监控数据永久丢失。</strong>
+    <p>表现：</p>
+    <ul>
+        <li>关闭页面后重新打开，IndexedDB 中<span class="highlight">无残留数据</span></li>
+        <li>控制台<span class="highlight">无离线补发日志</span></li>
+        <li>数据在页面关闭的瞬间<span class="highlight">静默丢失</span>，无任何错误提示</li>
+    </ul>
+</div>
+
+<!-- ============================================================ -->
+<h2>二、根因分析</h2>
+
+<h3>2.1 浏览器页面关闭的事件时序</h3>
+
+<div class="timeline">
+    <div class="timeline-item green">
+        <code>visibilitychange → hidden</code>（最先触发）
+    </div>
+    <div class="timeline-item green">
+        <code>pagehide</code>（紧随其后，几乎同时）
+    </div>
+    <div class="timeline-item red">
+        浏览器进程开始销毁，取消所有未完成的异步操作
+    </div>
+</div>
+
+<h3>2.2 旧设计的致命缺陷</h3>
+
+<p>旧设计中，<code>pagehide</code> 触发后走的是 <strong>完整的异步 sender 流程</strong>：</p>
+
+<div class="flow">
+    <span class="flow-item">pagehide</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-item">queue.flush()</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-item">sender.send() [async]</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-item">fetch #1</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-item">失败，setTimeout 1s</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-item">fetch #2</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-item">失败，setTimeout 1s</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-item">fetch #3</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-item">失败 → saveToDB</span>
+</div>
+
+<div class="card bad">
+    <span class="tag tag-err">核心矛盾</span>
+    <strong>sender 的异步重试链需要 3+ 秒，但浏览器在 pagehide 后立即开始销毁进程。</strong>
+    <p><code>setTimeout</code> 回调被取消，<code>fetch</code> 被中断，<code>saveToDB</code> 永远执行不到。</p>
+</div>
+
+<h3>2.3 为什么不是显而易见的？</h3>
+
+<ul>
+    <li><strong>静默丢失</strong>：没有异常抛出，没有 console.error，数据悄悄消失</li>
+    <li><strong>本地开发不易复现</strong>：开发时服务端一直开着，sender 重试 0 次就成功，不会触发 saveToDB 路径</li>
+    <li><strong>正常 flush 场景没问题</strong>：页面存活时，异步重试有充足时间完成</li>
+    <li><strong>Chrome DevTools 的误导</strong>：即使关闭标签页，DevTools 的 Network 面板仍可能显示 keepalive 请求，让人误以为"一切正常"</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2>三、新旧设计对比</h2>
+
+<h3>3.1 架构级差异</h3>
+
+<pre><code>┌─────────────────────────────────────────────────────────────┐
+│                     旧设计（有问题）                           │
+│                                                             │
+│  pagehide ──→ flush() ──→ sender.send() [async]              │
+│                              │                               │
+│                              ├─ fetch → 失败 → setTimeout    │
+│                              ├─ fetch → 失败 → setTimeout    │
+│                              └─ fetch → 失败 → saveToDB      │
+│                                   ↑                          │
+│                         页面已销毁，这些都不执行！              │
+├─────────────────────────────────────────────────────────────┤
+│                     新设计（修复后）                           │
+│                                                             │
+│  visibilitychange ──→ normalFlush = queue.flush()            │
+│                        └─→ sender.send() [async, 有重试]      │
+│                                                             │
+│  pagehide ──→ urgentFlush = drainQueue()                    │
+│                │ 同步快照 + 清空队列                           │
+│                ├─→ saveToDB(snapshot)  立即写 IndexedDB       │
+│                └─→ sendBeacon(url, body)   最后尝试发送        │
+│                                                             │
+│  pagehide 路径完全同步，不依赖 setTimeout/Promise              │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>3.2 关键接口变化</h3>
+
+<table class="diff-table">
+    <tr>
+        <th>模块</th>
+        <th>旧接口</th>
+        <th>新接口</th>
+    </tr>
+    <tr>
+        <td><code>queue.ts</code></td>
+        <td class="old"><code>flush(): void</code> — 清空队列并调用 sender</td>
+        <td class="new">新增 <code>drainQueue(): TransportItem[]</code> — 取出快照并清空，<strong>不调 sender</strong></td>
+    </tr>
+    <tr>
+        <td><code>unload.ts</code></td>
+        <td class="old"><code>setupUnload(flush: () => void)</code> — 单一回调，所有场景共用</td>
+        <td class="new"><code>setupUnload(normalFlush, urgentFlush)</code> — 双回调，场景分流</td>
+    </tr>
+    <tr>
+        <td><code>index.ts</code></td>
+        <td class="old"><code>setupUnload(flush)</code> — 传 queue.flush</td>
+        <td class="new"><code>setupUnload(flush, () => { drainQueue → saveToDB → sendBeacon })</code></td>
+    </tr>
+</table>
+
+<!-- ============================================================ -->
+<h2>四、实现细节 —— 逐文件逐行</h2>
+
+<h3>4.1 queue.ts：新增 drainQueue()</h3>
+
+<pre><code>// 文件：src/transport/queue.ts
+
+/**
+ * 取出队列中所有数据并清空，返回快照。
+ * 与 flush() 的区别：不调用 sender，由调用方自行处理数据。
+ * 专为 pagehide 场景设计 —— 此时不能依赖异步 sender。
+ */
+export function drainQueue(): TransportItem[] {
+    if (queue.length === 0) return [];
+    const snapshot: TransportItem[] = [...queue];  // 快照
+    queue.length = 0;                               // 清空
+    return snapshot;                                // 交给调用方
+}</code></pre>
+
+<div class="card good">
+    <span class="tag tag-ok">设计要点</span>
+    与 <code>flush()</code> 共享同一个 <code>queue</code> 数组，避免数据重复或遗漏。两个函数的清空操作（<code>queue.length = 0</code>）谁先执行谁生效，后执行的发现队列为空直接 return。
+</div>
+
+<h3>4.2 unload.ts：双回调分流</h3>
+
+<pre><code>// 文件：src/core/unload.ts
+
+let normalFlushFn: (() => void) | null = null   // visibilitychange 用
+let urgentFlushFn: (() => void) | null = null   // pagehide 用
+let flushed = false                              // 防重复标记
+
+export function setupUnload(
+    normalFlush: () => void,   // 正常路径 → sender 异步重试
+    urgentFlush: () => void,   // 紧急路径 → 同步写 DB + sendBeacon
+): void {
+    normalFlushFn = normalFlush
+    urgentFlushFn = urgentFlush
+
+    // visibilitychange：切 Tab → 走正常路径
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+            doFlush()            // → normalFlushFn() (sender 异步)
+        } else {
+            flushed = false      // 页面恢复可见，重置防重复标记
+        }
+    })
+
+    // pagehide：页面销毁 → 走快速通道，不经过 doFlush
+    window.addEventListener('pagehide', () => {
+        urgentFlushFn?.()         // → 直接写 DB + sendBeacon
+    })
+}
+
+function doFlush() {
+    if (flushed || !normalFlushFn) return
+    flushed = true
+    normalFlushFn()
+}</code></pre>
+
+<div class="card warn">
+    <span class="tag tag-warn">关键决策</span>
+    为什么 pagehide 不经过 <code>doFlush()</code>？因为 <code>visibilitychange</code> 与 <code>pagehide</code> 几乎同时触发，<code>doFlush()</code> 的 <code>flushed</code> 标记会导致 pagehide 的 flush 被静默跳过——这是一个之前修过的 Bug。
+</div>
+
+<h3>4.3 index.ts：构造快速通道</h3>
+
+<pre><code>// 文件：src/index.ts（init 函数内）
+
+setupQueue(config);
+const send = createSender(config);
+onFlush(send);
+
+// ── 双路径注入 ──
+setupUnload(
+    // 路径1：正常路径（visibilitychange）
+    flush,   // → queue.flush() → sender.send() [async + 重试]
+
+    // 路径2：紧急路径（pagehide）
+    () => {
+        const snapshot = drainQueue();     // ① 同步取出并清空队列
+        if (snapshot.length === 0 || !config) return;
+
+        saveToDB(snapshot).catch(() => {}); // ② 立即写 IndexedDB（异步但尽快）
+
+        const body = JSON.stringify(snapshot);
+        navigator.sendBeacon?.(config.url, body); // ③ 最后尝试发送
+    }
+);</code></pre>
+
+<div class="card good">
+    <span class="tag tag-ok">设计要点</span>
+    <code>saveToDB</code> 虽然是异步的，但在 pagehide 中浏览器通常会允许 IndexedDB 事务完成。<code>sendBeacon</code> 是浏览器级别的 fire-and-forget，即使页面关闭也会在后台完成。双保险：DB 确保持久化，sendBeacon 尝试即时发送。
+</div>
+
+<!-- ============================================================ -->
+<h2>五、问题发现与定位过程</h2>
+
+<h3>5.1 测试场景设计</h3>
+
+<div class="card">
+    <strong>模拟断网 → 制造数据 → 关闭页面 → 重新打开 → 检查 IndexedDB</strong>
+    <ol>
+        <li>启动 Express 服务端（端口 3001）</li>
+        <li>打开测试页面（<code>http://localhost:3001</code>）</li>
+        <li>Ctrl+C 停掉服务端（模拟断网）</li>
+        <li>点击按钮触发数据采集（LCP / FID / JS错误等）</li>
+        <li>数据进入队列，sender 尝试发送但服务端不在 → 触发重试</li>
+        <li><strong>直接关闭标签页</strong>，不等重试完成</li>
+        <li>重新打开页面，检查 IndexedDB 和 Console</li>
+    </ol>
+</div>
+
+<h3>5.2 定位手法</h3>
+
+<table class="diff-table">
+    <tr><th>步骤</th><th>方法</th><th>结论</th></tr>
+    <tr>
+        <td>① 验证 IndexedDB 本身</td>
+        <td>在 Console 手动执行 <code>indexedDB.open</code> + <code>add</code></td>
+        <td class="good">✅ IndexedDB 读写正常，排除存储层问题</td>
+    </tr>
+    <tr>
+        <td>② 验证断网时 sender 行为</td>
+        <td>停服务端，触发数据，观察 Console 重试日志</td>
+        <td class="good">✅ sender 重试 3 次后调用了 saveToDB，但仅在页面存活时</td>
+    </tr>
+    <tr>
+        <td>③ 缩小范围</td>
+        <td>页面存活时断网 → 数据能写 DB；关闭页面时 → 数据丢失</td>
+        <td class="warn">⚠️ 问题锁定在"关闭页面"这个动作上</td>
+    </tr>
+    <tr>
+        <td>④ 追踪 pagehide 链路</td>
+        <td>在 unload.ts / queue.ts / sender.ts 加 console.log 逐级追踪</td>
+        <td class="err">❌ pagehide → flush → sender.send 被调用，但 saveToDB 从未执行</td>
+    </tr>
+    <tr>
+        <td>⑤ 确认根因</td>
+        <td>分析 sender 异步重试时间线 vs 浏览器销毁时间线</td>
+        <td class="err">❌ sender 的 setTimeout 回调在页面销毁时被取消</td>
+    </tr>
+</table>
+
+<h3>5.3 关键调试技巧</h3>
+
+<pre><code>// 在 pagehide 中加日志，但注意 console.log 也可能来不及
+// 改用 navigator.sendBeacon 发一条最小调试数据：
+window.addEventListener('pagehide', () => {
+    navigator.sendBeacon('/debug', JSON.stringify({
+        event: 'pagehide',
+        queueLength: queue.length,         // ← 关键：此时队列还有数据吗？
+        timestamp: Date.now()
+    }));
+});</code></pre>
+
+<!-- ============================================================ -->
+<h2>六、技术深度总结</h2>
+
+<h3>6.1 涉及的核心概念</h3>
+
+<div class="card">
+    <table style="width:100%; border-collapse:collapse;">
+        <tr>
+            <td style="padding:6px 12px;">🔹</td>
+            <td><strong>浏览器页面生命周期</strong></td>
+            <td>visibilitychange vs pagehide 的触发时机和顺序</td>
+        </tr>
+        <tr>
+            <td style="padding:6px 12px;">🔹</td>
+            <td><strong>异步竞态条件</strong></td>
+            <td>setTimeout / Promise 在页面销毁时被取消的机制</td>
+        </tr>
+        <tr>
+            <td style="padding:6px 12px;">🔹</td>
+            <td><strong>keepalive 的局限性</strong></td>
+            <td>fetch keepalive 只保请求，不保重试链</td>
+        </tr>
+        <tr>
+            <td style="padding:6px 12px;">🔹</td>
+            <td><strong>IndexedDB 事务生命周期</strong></td>
+            <td>pagehide 中 IndexedDB 事务的特殊待遇</td>
+        </tr>
+        <tr>
+            <td style="padding:6px 12px;">🔹</td>
+            <td><strong>sendBeacon 的设计意图</strong></td>
+            <td>为什么 W3C 专门设计了 sendBeacon——就是为了这个场景</td>
+        </tr>
+        <tr>
+            <td style="padding:6px 12px;">🔹</td>
+            <td><strong>双路径架构</strong></td>
+            <td>同一种"发送"操作，不同场景走不同策略</td>
+        </tr>
+    </table>
+</div>
+
+<h3>6.2 面试可展开的讨论点</h3>
+
+<ul>
+    <li><strong>为什么不在 pagehide 中用同步 XMLHttpRequest？</strong>—— 已废弃，浏览器会忽略</li>
+    <li><strong>sendBeacon 有 64KB 限制，超了怎么办？</strong>—— 分批发送或只用 IndexedDB 持久化</li>
+    <li><strong>如果 IndexedDB 在 pagehide 中也写不进去呢？</strong>—— 这就是终极兜底：sessionStorage 存 JSON，下次 init 时检测</li>
+    <li><strong>多个 Tab 同时关闭时，IndexedDB 事务会冲突吗？</strong>—— IndexedDB 支持多连接，readwrite 事务会排队</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2>七、涉及文件清单</h2>
+
+<table class="diff-table">
+    <tr><th>文件</th><th>行数</th><th>变更类型</th><th>核心改动</th></tr>
+    <tr>
+        <td><code>src/transport/queue.ts</code></td>
+        <td>+9</td>
+        <td>新增导出</td>
+        <td>新增 <code>drainQueue()</code></td>
+    </tr>
+    <tr>
+        <td><code>src/core/unload.ts</code></td>
+        <td>~30</td>
+        <td>重写</td>
+        <td>单回调 → 双回调（normalFlush + urgentFlush）</td>
+    </tr>
+    <tr>
+        <td><code>src/index.ts</code></td>
+        <td>+10</td>
+        <td>修改</td>
+        <td>构造快速通道闭包，import drainQueue/saveToDB</td>
+    </tr>
+    <tr>
+        <td><code>src/transport/storage.ts</code></td>
+        <td>0</td>
+        <td>无变更</td>
+        <td>已有的 saveToDB 被复用</td>
+    </tr>
+    <tr>
+        <td><code>src/transport/sender.ts</code></td>
+        <td>0</td>
+        <td>无变更</td>
+        <td>pagehide 场景完全绕过 sender</td>
+    </tr>
+</table>
+
+<p style="text-align:center; color:var(--muted); margin-top:40px;">
+    perf-monitor · 从零实现的前端性能监控 SDK
+</p>
+
+</div>
+</body>
+</html>

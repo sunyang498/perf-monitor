@@ -1,0 +1,1748 @@
+[
+  {
+    "type": "LCP",
+    "value": 148,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287223185
+  },
+  {
+    "type": "CLS",
+    "value": 0.06002845628518117,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287224641
+  },
+  {
+    "type": "LCP",
+    "value": 1888,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287224765
+  },
+  {
+    "type": "LCP",
+    "value": 92,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287228448
+  },
+  {
+    "type": "CLS",
+    "value": 0.0715609376150705,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287228824
+  },
+  {
+    "type": "LCP",
+    "value": 684,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287228844
+  },
+  {
+    "type": "FID",
+    "value": 8,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287231179
+  },
+  {
+    "type": "FID",
+    "value": 40,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287234447
+  },
+  {
+    "type": "FID",
+    "value": 8,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287239445
+  },
+  {
+    "type": "promiseError",
+    "message": "这是一个未处理的 Promise 错误",
+    "timestamp": 1779287240069
+  },
+  {
+    "type": "resourceError",
+    "message": "加载 IMG 失败: https://example.com/this-image-does-not-exist.jpg",
+    "filename": "https://example.com/this-image-does-not-exist.jpg",
+    "timestamp": 1779287240531
+  },
+  {
+    "type": "jsError",
+    "message": "Uncaught ReferenceError: undefinedVar is not defined",
+    "filename": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "lineno": 104,
+    "colno": 25,
+    "stack": "ReferenceError: undefinedVar is not defined\n    at HTMLButtonElement.<anonymous> (http://127.0.0.1:5500/perf-monitor/test/index.html:104:25)",
+    "timestamp": 1779287241230
+  },
+  {
+    "type": "FID",
+    "value": 24,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287242409
+  },
+  {
+    "type": "resourceError",
+    "message": "加载 IMG 失败: https://example.com/this-image-does-not-exist.jpg",
+    "filename": "https://example.com/this-image-does-not-exist.jpg",
+    "timestamp": 1779287242814
+  },
+  {
+    "type": "promiseError",
+    "message": "这是一个未处理的 Promise 错误",
+    "timestamp": 1779287243062
+  },
+  {
+    "type": "jsError",
+    "message": "Uncaught ReferenceError: undefinedVar is not defined",
+    "filename": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "lineno": 104,
+    "colno": 25,
+    "stack": "ReferenceError: undefinedVar is not defined\n    at HTMLButtonElement.<anonymous> (http://127.0.0.1:5500/perf-monitor/test/index.html:104:25)",
+    "timestamp": 1779287245673
+  },
+  {
+    "type": "LCP",
+    "value": 84,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287247311
+  },
+  {
+    "type": "CLS",
+    "value": 0.04388298242333612,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287247466
+  },
+  {
+    "type": "LCP",
+    "value": 412,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287247487
+  },
+  {
+    "type": "FID",
+    "value": 8,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287248360
+  },
+  {
+    "type": "LCP",
+    "value": 628,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287306943
+  },
+  {
+    "type": "jsError",
+    "message": "Uncaught ReferenceError: undefinedVar is not defined",
+    "filename": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "lineno": 104,
+    "colno": 25,
+    "stack": "ReferenceError: undefinedVar is not defined\n    at HTMLButtonElement.<anonymous> (http://127.0.0.1:5500/perf-monitor/test/index.html:104:25)",
+    "timestamp": 1779287312217
+  },
+  {
+    "type": "FID",
+    "value": 8,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287312230
+  },
+  {
+    "type": "resourceError",
+    "message": "加载 IMG 失败: https://example.com/this-image-does-not-exist.jpg",
+    "filename": "https://example.com/this-image-does-not-exist.jpg",
+    "timestamp": 1779287314768
+  },
+  {
+    "type": "promiseError",
+    "message": "这是一个未处理的 Promise 错误",
+    "timestamp": 1779287316436
+  },
+  {
+    "type": "LCP",
+    "value": 628,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287306943
+  },
+  {
+    "type": "jsError",
+    "message": "Uncaught ReferenceError: undefinedVar is not defined",
+    "filename": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "lineno": 104,
+    "colno": 25,
+    "stack": "ReferenceError: undefinedVar is not defined\n    at HTMLButtonElement.<anonymous> (http://127.0.0.1:5500/perf-monitor/test/index.html:104:25)",
+    "timestamp": 1779287312217
+  },
+  {
+    "type": "FID",
+    "value": 8,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287312230
+  },
+  {
+    "type": "resourceError",
+    "message": "加载 IMG 失败: https://example.com/this-image-does-not-exist.jpg",
+    "filename": "https://example.com/this-image-does-not-exist.jpg",
+    "timestamp": 1779287314768
+  },
+  {
+    "type": "promiseError",
+    "message": "这是一个未处理的 Promise 错误",
+    "timestamp": 1779287316436
+  },
+  {
+    "type": "LCP",
+    "value": 92,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287368556
+  },
+  {
+    "type": "LCP",
+    "value": 84,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287369000
+  },
+  {
+    "type": "CLS",
+    "value": 0.06002845628518117,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287371773
+  },
+  {
+    "type": "LCP",
+    "value": 3024,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287371790
+  },
+  {
+    "type": "LCP",
+    "value": 644,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287374643
+  },
+  {
+    "type": "CLS",
+    "value": 0.04388298242333612,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287374699
+  },
+  {
+    "type": "LCP",
+    "value": 748,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287374729
+  },
+  {
+    "type": "LCP",
+    "value": 88,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287379773
+  },
+  {
+    "type": "CLS",
+    "value": 0.04388298242333612,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287379830
+  },
+  {
+    "type": "LCP",
+    "value": 668,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287379850
+  },
+  {
+    "type": "LCP",
+    "value": 80,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287384960
+  },
+  {
+    "type": "CLS",
+    "value": 0.04388298242333612,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287385019
+  },
+  {
+    "type": "LCP",
+    "value": 668,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287385136
+  },
+  {
+    "type": "LCP",
+    "value": 96,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287390163
+  },
+  {
+    "type": "CLS",
+    "value": 0.04388298242333612,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287390223
+  },
+  {
+    "type": "LCP",
+    "value": 672,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287390239
+  },
+  {
+    "type": "LCP",
+    "value": 84,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287400363
+  },
+  {
+    "type": "CLS",
+    "value": 0.04388298242333612,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287400421
+  },
+  {
+    "type": "LCP",
+    "value": 676,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287400451
+  },
+  {
+    "type": "LCP",
+    "value": 88,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287405584
+  },
+  {
+    "type": "CLS",
+    "value": 0.04388298242333612,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287405639
+  },
+  {
+    "type": "LCP",
+    "value": 688,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287405663
+  },
+  {
+    "type": "LCP",
+    "value": 5436,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287412744
+  },
+  {
+    "type": "jsError",
+    "message": "Uncaught ReferenceError: undefinedVar is not defined",
+    "filename": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "lineno": 104,
+    "colno": 25,
+    "stack": "ReferenceError: undefinedVar is not defined\n    at HTMLButtonElement.<anonymous> (http://127.0.0.1:5500/perf-monitor/test/index.html:104:25)",
+    "timestamp": 1779287414688
+  },
+  {
+    "type": "FID",
+    "value": 8,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287414706
+  },
+  {
+    "type": "LCP",
+    "value": 140,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287447184
+  },
+  {
+    "type": "CLS",
+    "value": 0.04996700109337201,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287447664
+  },
+  {
+    "type": "LCP",
+    "value": 1152,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287447695
+  },
+  {
+    "type": "FID",
+    "value": 0,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287448844
+  },
+  {
+    "type": "LCP",
+    "value": 96,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287452386
+  },
+  {
+    "type": "CLS",
+    "value": 0.06002845628518117,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287452436
+  },
+  {
+    "type": "LCP",
+    "value": 696,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287452472
+  },
+  {
+    "type": "LCP",
+    "value": 3788,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287458188
+  },
+  {
+    "type": "LCP",
+    "value": 236,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287459895
+  },
+  {
+    "type": "CLS",
+    "value": 0.06002845628518117,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287460371
+  },
+  {
+    "type": "LCP",
+    "value": 768,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287460405
+  },
+  {
+    "type": "LCP",
+    "value": 5052,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287469765
+  },
+  {
+    "type": "LCP",
+    "value": 96,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287470227
+  },
+  {
+    "type": "CLS",
+    "value": 0.06002845628518117,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287470410
+  },
+  {
+    "type": "LCP",
+    "value": 436,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287470414
+  },
+  {
+    "type": "LCP",
+    "value": 440,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287472218
+  },
+  {
+    "type": "CLS",
+    "value": 0.06002845628518117,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287472230
+  },
+  {
+    "type": "LCP",
+    "value": 468,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287472248
+  },
+  {
+    "type": "LCP",
+    "value": 84,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287477277
+  },
+  {
+    "type": "CLS",
+    "value": 0.06002845628518117,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287478272
+  },
+  {
+    "type": "LCP",
+    "value": 1272,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779287478291
+  },
+  {
+    "type": "LCP",
+    "value": 2061760,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779289541733
+  },
+  {
+    "type": "LCP",
+    "value": 72,
+    "pageUrl": "file:///D:/vscWorkplace/perf-monitor/perf-monitor/test/index.html",
+    "timestamp": 1779289548615
+  },
+  {
+    "type": "CLS",
+    "value": 0.06002845628518117,
+    "pageUrl": "file:///D:/vscWorkplace/perf-monitor/perf-monitor/test/index.html",
+    "timestamp": 1779289551726
+  },
+  {
+    "type": "LCP",
+    "value": 3276,
+    "pageUrl": "file:///D:/vscWorkplace/perf-monitor/perf-monitor/test/index.html",
+    "timestamp": 1779289551820
+  },
+  {
+    "type": "FID",
+    "value": 8,
+    "pageUrl": "file:///D:/vscWorkplace/perf-monitor/perf-monitor/test/index.html",
+    "timestamp": 1779289565281
+  },
+  {
+    "type": "jsError",
+    "message": "Uncaught ReferenceError: undefinedVar is not defined",
+    "filename": "file:///D:/vscWorkplace/perf-monitor/perf-monitor/test/index.html",
+    "lineno": 104,
+    "colno": 25,
+    "stack": "ReferenceError: undefinedVar is not defined\n    at HTMLButtonElement.<anonymous> (file:///D:/vscWorkplace/perf-monitor/perf-monitor/test/index.html:104:25)",
+    "timestamp": 1779289566756
+  },
+  {
+    "type": "promiseError",
+    "message": "这是一个未处理的 Promise 错误",
+    "timestamp": 1779289569047
+  },
+  {
+    "type": "resourceError",
+    "message": "加载 IMG 失败: https://example.com/this-image-does-not-exist.jpg",
+    "filename": "https://example.com/this-image-does-not-exist.jpg",
+    "timestamp": 1779289570029
+  },
+  {
+    "type": "LCP",
+    "value": 44,
+    "pageUrl": "file:///D:/vscWorkplace/perf-monitor/perf-monitor/test/index.html",
+    "timestamp": 1779289795238
+  },
+  {
+    "type": "CLS",
+    "value": 0.06002845628518117,
+    "pageUrl": "file:///D:/vscWorkplace/perf-monitor/perf-monitor/test/index.html",
+    "timestamp": 1779289796689
+  },
+  {
+    "type": "LCP",
+    "value": 1588,
+    "pageUrl": "file:///D:/vscWorkplace/perf-monitor/perf-monitor/test/index.html",
+    "timestamp": 1779289796782
+  },
+  {
+    "type": "jsError",
+    "message": "Uncaught ReferenceError: undefinedVar is not defined",
+    "filename": "file:///D:/vscWorkplace/perf-monitor/perf-monitor/test/index.html",
+    "lineno": 104,
+    "colno": 25,
+    "stack": "ReferenceError: undefinedVar is not defined\n    at HTMLButtonElement.<anonymous> (file:///D:/vscWorkplace/perf-monitor/perf-monitor/test/index.html:104:25)",
+    "timestamp": 1779289799631
+  },
+  {
+    "type": "FID",
+    "value": 0,
+    "pageUrl": "file:///D:/vscWorkplace/perf-monitor/perf-monitor/test/index.html",
+    "timestamp": 1779289799643
+  },
+  {
+    "type": "LCP",
+    "value": 44,
+    "pageUrl": "file:///D:/vscWorkplace/perf-monitor/perf-monitor/test/index.html",
+    "timestamp": 1779289795238
+  },
+  {
+    "type": "CLS",
+    "value": 0.06002845628518117,
+    "pageUrl": "file:///D:/vscWorkplace/perf-monitor/perf-monitor/test/index.html",
+    "timestamp": 1779289796689
+  },
+  {
+    "type": "LCP",
+    "value": 1588,
+    "pageUrl": "file:///D:/vscWorkplace/perf-monitor/perf-monitor/test/index.html",
+    "timestamp": 1779289796782
+  },
+  {
+    "type": "jsError",
+    "message": "Uncaught ReferenceError: undefinedVar is not defined",
+    "filename": "file:///D:/vscWorkplace/perf-monitor/perf-monitor/test/index.html",
+    "lineno": 104,
+    "colno": 25,
+    "stack": "ReferenceError: undefinedVar is not defined\n    at HTMLButtonElement.<anonymous> (file:///D:/vscWorkplace/perf-monitor/perf-monitor/test/index.html:104:25)",
+    "timestamp": 1779289799631
+  },
+  {
+    "type": "FID",
+    "value": 0,
+    "pageUrl": "file:///D:/vscWorkplace/perf-monitor/perf-monitor/test/index.html",
+    "timestamp": 1779289799643
+  },
+  {
+    "type": "resourceError",
+    "message": "加载 IMG 失败: https://example.com/this-image-does-not-exist.jpg",
+    "filename": "https://example.com/this-image-does-not-exist.jpg",
+    "timestamp": 1779289801287
+  },
+  {
+    "type": "promiseError",
+    "message": "这是一个未处理的 Promise 错误",
+    "timestamp": 1779289801397
+  },
+  {
+    "type": "resourceError",
+    "message": "加载 IMG 失败: https://example.com/this-image-does-not-exist.jpg",
+    "filename": "https://example.com/this-image-does-not-exist.jpg",
+    "timestamp": 1779289801287
+  },
+  {
+    "type": "promiseError",
+    "message": "这是一个未处理的 Promise 错误",
+    "timestamp": 1779289801397
+  },
+  {
+    "type": "LCP",
+    "value": 44,
+    "pageUrl": "file:///D:/vscWorkplace/perf-monitor/perf-monitor/test/index.html",
+    "timestamp": 1779289847906
+  },
+  {
+    "type": "CLS",
+    "value": 0.06002845628518117,
+    "pageUrl": "file:///D:/vscWorkplace/perf-monitor/perf-monitor/test/index.html",
+    "timestamp": 1779289848714
+  },
+  {
+    "type": "LCP",
+    "value": 876,
+    "pageUrl": "file:///D:/vscWorkplace/perf-monitor/perf-monitor/test/index.html",
+    "timestamp": 1779289848736
+  },
+  {
+    "type": "FID",
+    "value": 8,
+    "pageUrl": "file:///D:/vscWorkplace/perf-monitor/perf-monitor/test/index.html",
+    "timestamp": 1779289868009
+  },
+  {
+    "type": "jsError",
+    "message": "Uncaught ReferenceError: undefinedVar is not defined",
+    "filename": "file:///D:/vscWorkplace/perf-monitor/perf-monitor/test/index.html",
+    "lineno": 104,
+    "colno": 25,
+    "stack": "ReferenceError: undefinedVar is not defined\n    at HTMLButtonElement.<anonymous> (file:///D:/vscWorkplace/perf-monitor/perf-monitor/test/index.html:104:25)",
+    "timestamp": 1779289868293
+  },
+  {
+    "type": "resourceError",
+    "message": "加载 IMG 失败: https://example.com/this-image-does-not-exist.jpg",
+    "filename": "https://example.com/this-image-does-not-exist.jpg",
+    "timestamp": 1779289868740
+  },
+  {
+    "type": "promiseError",
+    "message": "这是一个未处理的 Promise 错误",
+    "timestamp": 1779289868805
+  },
+  {
+    "type": "LCP",
+    "value": 96,
+    "pageUrl": "file:///D:/vscWorkplace/perf-monitor/perf-monitor/test/index.html",
+    "timestamp": 1779289892847
+  },
+  {
+    "type": "CLS",
+    "value": 0.04996700109337201,
+    "pageUrl": "file:///D:/vscWorkplace/perf-monitor/perf-monitor/test/index.html",
+    "timestamp": 1779289893679
+  },
+  {
+    "type": "LCP",
+    "value": 972,
+    "pageUrl": "file:///D:/vscWorkplace/perf-monitor/perf-monitor/test/index.html",
+    "timestamp": 1779289893719
+  },
+  {
+    "type": "FID",
+    "value": 0,
+    "pageUrl": "file:///D:/vscWorkplace/perf-monitor/perf-monitor/test/index.html",
+    "timestamp": 1779289894419
+  },
+  {
+    "type": "LCP",
+    "value": 40,
+    "pageUrl": "file:///D:/vscWorkplace/perf-monitor/perf-monitor/test/index.html",
+    "timestamp": 1779289918867
+  },
+  {
+    "type": "CLS",
+    "value": 0.06002845628518117,
+    "pageUrl": "file:///D:/vscWorkplace/perf-monitor/perf-monitor/test/index.html",
+    "timestamp": 1779289919153
+  },
+  {
+    "type": "LCP",
+    "value": 348,
+    "pageUrl": "file:///D:/vscWorkplace/perf-monitor/perf-monitor/test/index.html",
+    "timestamp": 1779289919175
+  },
+  {
+    "type": "LCP",
+    "value": 148,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337242004
+  },
+  {
+    "type": "CLS",
+    "value": 0.04996700109337201,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337242088
+  },
+  {
+    "type": "LCP",
+    "value": 788,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337242199
+  },
+  {
+    "type": "FID",
+    "value": 352,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337247053
+  },
+  {
+    "type": "LCP",
+    "value": 76,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337252255
+  },
+  {
+    "type": "CLS",
+    "value": 0.0788240170780771,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337252319
+  },
+  {
+    "type": "LCP",
+    "value": 532,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337252340
+  },
+  {
+    "type": "jsError",
+    "message": "Uncaught ReferenceError: undefinedVar is not defined",
+    "filename": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "lineno": 104,
+    "colno": 25,
+    "stack": "ReferenceError: undefinedVar is not defined\n    at HTMLButtonElement.<anonymous> (http://127.0.0.1:5500/perf-monitor/test/index.html:104:25)",
+    "timestamp": 1779337253113
+  },
+  {
+    "type": "FID",
+    "value": 8,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337253123
+  },
+  {
+    "type": "FID",
+    "value": 0,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337253381
+  },
+  {
+    "type": "LCP",
+    "value": 96,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337255485
+  },
+  {
+    "type": "CLS",
+    "value": 0.06569560090881046,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337255547
+  },
+  {
+    "type": "LCP",
+    "value": 332,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337255648
+  },
+  {
+    "type": "LCP",
+    "value": 156,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337261136
+  },
+  {
+    "type": "CLS",
+    "value": 0.04996700109337201,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337261180
+  },
+  {
+    "type": "LCP",
+    "value": 364,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337261286
+  },
+  {
+    "type": "jsError",
+    "message": "Uncaught ReferenceError: undefinedVar is not defined",
+    "filename": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "lineno": 104,
+    "colno": 25,
+    "stack": "ReferenceError: undefinedVar is not defined\n    at HTMLButtonElement.<anonymous> (http://127.0.0.1:5500/perf-monitor/test/index.html:104:25)",
+    "timestamp": 1779337263067
+  },
+  {
+    "type": "FID",
+    "value": 0,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337263080
+  },
+  {
+    "type": "promiseError",
+    "message": "这是一个未处理的 Promise 错误",
+    "timestamp": 1779337263602
+  },
+  {
+    "type": "FID",
+    "value": 16,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337263614
+  },
+  {
+    "type": "jsError",
+    "message": "Uncaught ReferenceError: undefinedVar is not defined",
+    "filename": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "lineno": 104,
+    "colno": 25,
+    "stack": "ReferenceError: undefinedVar is not defined\n    at HTMLButtonElement.<anonymous> (http://127.0.0.1:5500/perf-monitor/test/index.html:104:25)",
+    "timestamp": 1779337264138
+  },
+  {
+    "type": "FID",
+    "value": 8,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337271289
+  },
+  {
+    "type": "LCP",
+    "value": 84,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337276369
+  },
+  {
+    "type": "CLS",
+    "value": 0.06002845628518117,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337276391
+  },
+  {
+    "type": "LCP",
+    "value": 644,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337276415
+  },
+  {
+    "type": "jsError",
+    "message": "Uncaught ReferenceError: undefinedVar is not defined",
+    "filename": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "lineno": 104,
+    "colno": 25,
+    "stack": "ReferenceError: undefinedVar is not defined\n    at HTMLButtonElement.<anonymous> (http://127.0.0.1:5500/perf-monitor/test/index.html:104:25)",
+    "timestamp": 1779337278613
+  },
+  {
+    "type": "FID",
+    "value": 8,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337278626
+  },
+  {
+    "type": "LCP",
+    "value": 92,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337279009
+  },
+  {
+    "type": "LCP",
+    "value": 316,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337279069
+  },
+  {
+    "type": "FID",
+    "value": 0,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337280360
+  },
+  {
+    "type": "LCP",
+    "value": 88,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337284213
+  },
+  {
+    "type": "CLS",
+    "value": 0.06002845628518117,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337284276
+  },
+  {
+    "type": "LCP",
+    "value": 328,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337284370
+  },
+  {
+    "type": "FID",
+    "value": 8,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337285567
+  },
+  {
+    "type": "resourceError",
+    "message": "加载 IMG 失败: https://example.com/this-image-does-not-exist.jpg",
+    "filename": "https://example.com/this-image-does-not-exist.jpg",
+    "timestamp": 1779337286121
+  },
+  {
+    "type": "LCP",
+    "value": 92,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337286493
+  },
+  {
+    "type": "LCP",
+    "value": 320,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337286566
+  },
+  {
+    "type": "jsError",
+    "message": "Uncaught ReferenceError: undefinedVar is not defined",
+    "filename": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "lineno": 104,
+    "colno": 25,
+    "stack": "ReferenceError: undefinedVar is not defined\n    at HTMLButtonElement.<anonymous> (http://127.0.0.1:5500/perf-monitor/test/index.html:104:25)",
+    "timestamp": 1779337287748
+  },
+  {
+    "type": "FID",
+    "value": 8,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337287772
+  },
+  {
+    "type": "LCP",
+    "value": 84,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337291671
+  },
+  {
+    "type": "CLS",
+    "value": 0.06002845628518117,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337291733
+  },
+  {
+    "type": "LCP",
+    "value": 320,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337291843
+  },
+  {
+    "type": "LCP",
+    "value": 17252,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337460772
+  },
+  {
+    "type": "LCP",
+    "value": 96,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337464010
+  },
+  {
+    "type": "LCP",
+    "value": 372,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337464232
+  },
+  {
+    "type": "LCP",
+    "value": 80,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337469231
+  },
+  {
+    "type": "LCP",
+    "value": 348,
+    "pageUrl": "http://127.0.0.1:5500/perf-monitor/test/index.html",
+    "timestamp": 1779337469411
+  },
+  {
+    "type": "LCP",
+    "value": 148,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779337474863
+  },
+  {
+    "type": "CLS",
+    "value": 0.06002845628518117,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779337475764
+  },
+  {
+    "type": "LCP",
+    "value": 1288,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779337475853
+  },
+  {
+    "type": "FID",
+    "value": 16,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779337483152
+  },
+  {
+    "type": "resourceError",
+    "message": "加载 IMG 失败: https://example.com/this-image-does-not-exist.jpg",
+    "filename": "https://example.com/this-image-does-not-exist.jpg",
+    "timestamp": 1779337483653
+  },
+  {
+    "type": "promiseError",
+    "message": "这是一个未处理的 Promise 错误",
+    "timestamp": 1779337485218
+  },
+  {
+    "type": "jsError",
+    "message": "Uncaught ReferenceError: undefinedVar is not defined",
+    "filename": "http://localhost:3001/",
+    "lineno": 104,
+    "colno": 25,
+    "stack": "ReferenceError: undefinedVar is not defined\n    at HTMLButtonElement.<anonymous> (http://localhost:3001/:104:25)",
+    "timestamp": 1779337486712
+  },
+  {
+    "type": "LCP",
+    "value": 76,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779337502343
+  },
+  {
+    "type": "CLS",
+    "value": 0.06002845628518117,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779337502375
+  },
+  {
+    "type": "LCP",
+    "value": 688,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779337502400
+  },
+  {
+    "type": "FID",
+    "value": 8,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779337505486
+  },
+  {
+    "type": "resourceError",
+    "message": "加载 IMG 失败: https://example.com/this-image-does-not-exist.jpg",
+    "filename": "https://example.com/this-image-does-not-exist.jpg",
+    "timestamp": 1779337505745
+  },
+  {
+    "type": "promiseError",
+    "message": "这是一个未处理的 Promise 错误",
+    "timestamp": 1779337505777
+  },
+  {
+    "type": "LCP",
+    "value": 124,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779337515651
+  },
+  {
+    "type": "CLS",
+    "value": 0.04996700109337201,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779337515850
+  },
+  {
+    "type": "LCP",
+    "value": 900,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779337515885
+  },
+  {
+    "type": "FID",
+    "value": 0,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779337516674
+  },
+  {
+    "type": "resourceError",
+    "message": "加载 IMG 失败: https://example.com/this-image-does-not-exist.jpg",
+    "filename": "https://example.com/this-image-does-not-exist.jpg",
+    "timestamp": 1779337621028
+  },
+  {
+    "type": "jsError",
+    "message": "Uncaught ReferenceError: undefinedVar is not defined",
+    "filename": "http://localhost:3001/",
+    "lineno": 104,
+    "colno": 25,
+    "stack": "ReferenceError: undefinedVar is not defined\n    at HTMLButtonElement.<anonymous> (http://localhost:3001/:104:25)",
+    "timestamp": 1779337621935
+  },
+  {
+    "type": "promiseError",
+    "message": "这是一个未处理的 Promise 错误",
+    "timestamp": 1779337623044
+  },
+  {
+    "type": "LCP",
+    "value": 84,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779337646710
+  },
+  {
+    "type": "CLS",
+    "value": 0.06002845628518117,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779337646929
+  },
+  {
+    "type": "LCP",
+    "value": 968,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779337647006
+  },
+  {
+    "type": "jsError",
+    "message": "Uncaught ReferenceError: undefinedVar is not defined",
+    "filename": "http://localhost:3001/",
+    "lineno": 104,
+    "colno": 25,
+    "stack": "ReferenceError: undefinedVar is not defined\n    at HTMLButtonElement.<anonymous> (http://localhost:3001/:104:25)",
+    "timestamp": 1779337648512
+  },
+  {
+    "type": "FID",
+    "value": 8,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779337648527
+  },
+  {
+    "type": "promiseError",
+    "message": "这是一个未处理的 Promise 错误",
+    "timestamp": 1779337650942
+  },
+  {
+    "type": "resourceError",
+    "message": "加载 IMG 失败: https://example.com/this-image-does-not-exist.jpg",
+    "filename": "https://example.com/this-image-does-not-exist.jpg",
+    "timestamp": 1779337651392
+  },
+  {
+    "type": "LCP",
+    "value": 999
+  },
+  {
+    "type": "LCP",
+    "value": 1156,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779338323493
+  },
+  {
+    "type": "CLS",
+    "value": 0.06002845628518117,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779338323741
+  },
+  {
+    "type": "LCP",
+    "value": 2132,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779338323816
+  },
+  {
+    "type": "LCP",
+    "value": 999
+  },
+  {
+    "type": "FID",
+    "value": 0,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779338331536
+  },
+  {
+    "type": "promiseError",
+    "message": "这是一个未处理的 Promise 错误",
+    "timestamp": 1779338333431
+  },
+  {
+    "type": "jsError",
+    "message": "Uncaught ReferenceError: undefinedVar is not defined",
+    "filename": "http://localhost:3001/",
+    "lineno": 104,
+    "colno": 25,
+    "stack": "ReferenceError: undefinedVar is not defined\n    at HTMLButtonElement.<anonymous> (http://localhost:3001/:104:25)",
+    "timestamp": 1779338333776
+  },
+  {
+    "type": "resourceError",
+    "message": "加载 IMG 失败: https://example.com/this-image-does-not-exist.jpg",
+    "filename": "https://example.com/this-image-does-not-exist.jpg",
+    "timestamp": 1779338333845
+  },
+  {
+    "type": "LCP",
+    "value": 120,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779338343807
+  },
+  {
+    "type": "CLS",
+    "value": 0.04996700109337201,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779338343847
+  },
+  {
+    "type": "LCP",
+    "value": 708,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779338343883
+  },
+  {
+    "type": "FID",
+    "value": 0,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779338345436
+  },
+  {
+    "type": "promiseError",
+    "message": "这是一个未处理的 Promise 错误",
+    "timestamp": 1779338356442
+  },
+  {
+    "type": "resourceError",
+    "message": "加载 IMG 失败: https://example.com/this-image-does-not-exist.jpg",
+    "filename": "https://example.com/this-image-does-not-exist.jpg",
+    "timestamp": 1779338356978
+  },
+  {
+    "type": "jsError",
+    "message": "Uncaught ReferenceError: undefinedVar is not defined",
+    "filename": "http://localhost:3001/",
+    "lineno": 104,
+    "colno": 25,
+    "stack": "ReferenceError: undefinedVar is not defined\n    at HTMLButtonElement.<anonymous> (http://localhost:3001/:104:25)",
+    "timestamp": 1779338357181
+  },
+  {
+    "type": "CLS",
+    "value": 0.05031009743954701,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779338420833
+  },
+  {
+    "type": "resourceError",
+    "message": "加载 IMG 失败: https://example.com/this-image-does-not-exist.jpg",
+    "filename": "https://example.com/this-image-does-not-exist.jpg",
+    "timestamp": 1779338422385
+  },
+  {
+    "type": "promiseError",
+    "message": "这是一个未处理的 Promise 错误",
+    "timestamp": 1779338363329
+  },
+  {
+    "type": "jsError",
+    "message": "Uncaught ReferenceError: undefinedVar is not defined",
+    "filename": "http://localhost:3001/",
+    "lineno": 104,
+    "colno": 25,
+    "stack": "ReferenceError: undefinedVar is not defined\n    at HTMLButtonElement.<anonymous> (http://localhost:3001/:104:25)",
+    "timestamp": 1779338435334
+  },
+  {
+    "type": "promiseError",
+    "message": "这是一个未处理的 Promise 错误",
+    "timestamp": 1779338435890
+  },
+  {
+    "type": "resourceError",
+    "message": "加载 IMG 失败: https://example.com/this-image-does-not-exist.jpg",
+    "filename": "https://example.com/this-image-does-not-exist.jpg",
+    "timestamp": 1779338435986
+  },
+  {
+    "type": "LCP",
+    "value": 136,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779338453471
+  },
+  {
+    "type": "CLS",
+    "value": 0.04996700109337201,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779338453853
+  },
+  {
+    "type": "LCP",
+    "value": 1064,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779338453881
+  },
+  {
+    "type": "FID",
+    "value": 0,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779338454679
+  },
+  {
+    "type": "LCP",
+    "value": 96,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779340363241
+  },
+  {
+    "type": "CLS",
+    "value": 0.06002845628518117,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779340368169
+  },
+  {
+    "type": "jsError",
+    "message": "Uncaught ReferenceError: undefinedVar is not defined",
+    "filename": "http://localhost:3001/",
+    "lineno": 104,
+    "colno": 25,
+    "stack": "ReferenceError: undefinedVar is not defined\n    at HTMLButtonElement.<anonymous> (http://localhost:3001/:104:25)",
+    "timestamp": 1779340372561
+  },
+  {
+    "type": "FID",
+    "value": 8,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779340372574
+  },
+  {
+    "type": "resourceError",
+    "message": "加载 IMG 失败: https://example.com/this-image-does-not-exist.jpg",
+    "filename": "https://example.com/this-image-does-not-exist.jpg",
+    "timestamp": 1779340413307
+  },
+  {
+    "type": "promiseError",
+    "message": "这是一个未处理的 Promise 错误",
+    "timestamp": 1779340416784
+  },
+  {
+    "type": "promiseError",
+    "message": "这是一个未处理的 Promise 错误",
+    "timestamp": 1779340377687
+  },
+  {
+    "type": "resourceError",
+    "message": "加载 IMG 失败: https://example.com/this-image-does-not-exist.jpg",
+    "filename": "https://example.com/this-image-does-not-exist.jpg",
+    "timestamp": 1779340378624
+  },
+  {
+    "type": "jsError",
+    "message": "Uncaught ReferenceError: undefinedVar is not defined",
+    "filename": "http://localhost:3001/",
+    "lineno": 104,
+    "colno": 25,
+    "stack": "ReferenceError: undefinedVar is not defined\n    at HTMLButtonElement.<anonymous> (http://localhost:3001/:104:25)",
+    "timestamp": 1779340382950
+  },
+  {
+    "type": "LCP",
+    "value": 80,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779340428963
+  },
+  {
+    "type": "CLS",
+    "value": 0.0715609376150705,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779340431629
+  },
+  {
+    "type": "LCP",
+    "value": 4276,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779340432583
+  },
+  {
+    "type": "FID",
+    "value": 16,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779340435274
+  },
+  {
+    "type": "resourceError",
+    "message": "加载 IMG 失败: https://example.com/this-image-does-not-exist.jpg",
+    "filename": "https://example.com/this-image-does-not-exist.jpg",
+    "timestamp": 1779340435454
+  },
+  {
+    "type": "promiseError",
+    "message": "这是一个未处理的 Promise 错误",
+    "timestamp": 1779340435545
+  },
+  {
+    "type": "LCP",
+    "value": 124,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779340442910
+  },
+  {
+    "type": "FID",
+    "value": 16,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779340435274
+  },
+  {
+    "type": "resourceError",
+    "message": "加载 IMG 失败: https://example.com/this-image-does-not-exist.jpg",
+    "filename": "https://example.com/this-image-does-not-exist.jpg",
+    "timestamp": 1779340435454
+  },
+  {
+    "type": "promiseError",
+    "message": "这是一个未处理的 Promise 错误",
+    "timestamp": 1779340435545
+  },
+  {
+    "type": "promiseError",
+    "message": "这是一个未处理的 Promise 错误",
+    "timestamp": 1779340435809
+  },
+  {
+    "type": "CLS",
+    "value": 0.04996700109337201,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779340442973
+  },
+  {
+    "type": "FID",
+    "value": 0,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779340444186
+  },
+  {
+    "type": "LCP",
+    "value": 148,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779348645413
+  },
+  {
+    "type": "CLS",
+    "value": 0.06002845628518117,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779348645898
+  },
+  {
+    "type": "LCP",
+    "value": 1284,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779348645986
+  },
+  {
+    "type": "jsError",
+    "message": "Uncaught ReferenceError: undefinedVar is not defined",
+    "filename": "http://localhost:3001/",
+    "lineno": 104,
+    "colno": 25,
+    "stack": "ReferenceError: undefinedVar is not defined\n    at HTMLButtonElement.<anonymous> (http://localhost:3001/:104:25)",
+    "timestamp": 1779348658573
+  },
+  {
+    "type": "FID",
+    "value": 24,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779348658587
+  },
+  {
+    "type": "resourceError",
+    "message": "加载 IMG 失败: https://example.com/this-image-does-not-exist.jpg",
+    "filename": "https://example.com/this-image-does-not-exist.jpg",
+    "timestamp": 1779348738524
+  },
+  {
+    "type": "promiseError",
+    "message": "这是一个未处理的 Promise 错误",
+    "timestamp": 1779348670706
+  },
+  {
+    "type": "resourceError",
+    "message": "加载 IMG 失败: https://example.com/this-image-does-not-exist.jpg",
+    "filename": "https://example.com/this-image-does-not-exist.jpg",
+    "timestamp": 1779348671269
+  },
+  {
+    "type": "jsError",
+    "message": "Uncaught ReferenceError: undefinedVar is not defined",
+    "filename": "http://localhost:3001/",
+    "lineno": 104,
+    "colno": 25,
+    "stack": "ReferenceError: undefinedVar is not defined\n    at HTMLButtonElement.<anonymous> (http://localhost:3001/:104:25)",
+    "timestamp": 1779348671466
+  },
+  {
+    "type": "LCP",
+    "value": 80,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779348775112
+  },
+  {
+    "type": "LCP",
+    "value": 868,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779348775331
+  },
+  {
+    "type": "LCP",
+    "value": 132,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779348803465
+  },
+  {
+    "type": "CLS",
+    "value": 0.04996700109337201,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779348803546
+  },
+  {
+    "type": "LCP",
+    "value": 760,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779348803562
+  },
+  {
+    "type": "FID",
+    "value": 0,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779348804397
+  },
+  {
+    "type": "jsError",
+    "message": "Uncaught ReferenceError: undefinedVar is not defined",
+    "filename": "http://localhost:3001/",
+    "lineno": 104,
+    "colno": 25,
+    "stack": "ReferenceError: undefinedVar is not defined\n    at HTMLButtonElement.<anonymous> (http://localhost:3001/:104:25)",
+    "timestamp": 1779348821570
+  },
+  {
+    "type": "LCP",
+    "value": 620,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779348834467
+  },
+  {
+    "type": "CLS",
+    "value": 0.0715609376150705,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779348834535
+  },
+  {
+    "type": "LCP",
+    "value": 732,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779348834552
+  },
+  {
+    "type": "jsError",
+    "message": "Uncaught ReferenceError: undefinedVar is not defined",
+    "filename": "http://localhost:3001/",
+    "lineno": 104,
+    "colno": 25,
+    "stack": "ReferenceError: undefinedVar is not defined\n    at HTMLButtonElement.<anonymous> (http://localhost:3001/:104:25)",
+    "timestamp": 1779348838835
+  },
+  {
+    "type": "FID",
+    "value": 8,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779348838855
+  },
+  {
+    "type": "jsError",
+    "message": "Uncaught ReferenceError: undefinedVar is not defined",
+    "filename": "http://localhost:3001/",
+    "lineno": 104,
+    "colno": 25,
+    "stack": "ReferenceError: undefinedVar is not defined\n    at HTMLButtonElement.<anonymous> (http://localhost:3001/:104:25)",
+    "timestamp": 1779348839047
+  },
+  {
+    "type": "LCP",
+    "value": 124,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779348849180
+  },
+  {
+    "type": "CLS",
+    "value": 0.04996700109337201,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779348849271
+  },
+  {
+    "type": "LCP",
+    "value": 752,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779348849291
+  },
+  {
+    "type": "jsError",
+    "message": "Uncaught ReferenceError: undefinedVar is not defined",
+    "filename": "http://localhost:3001/",
+    "lineno": 104,
+    "colno": 25,
+    "stack": "ReferenceError: undefinedVar is not defined\n    at HTMLButtonElement.<anonymous> (http://localhost:3001/:104:25)",
+    "timestamp": 1779348839047
+  },
+  {
+    "type": "jsError",
+    "message": "Uncaught ReferenceError: undefinedVar is not defined",
+    "filename": "http://localhost:3001/",
+    "lineno": 104,
+    "colno": 25,
+    "stack": "ReferenceError: undefinedVar is not defined\n    at HTMLButtonElement.<anonymous> (http://localhost:3001/:104:25)",
+    "timestamp": 1779348839227
+  },
+  {
+    "type": "FID",
+    "value": 8,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779348850009
+  },
+  {
+    "type": "LCP",
+    "value": 84,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779349903092
+  },
+  {
+    "type": "CLS",
+    "value": 0.06002845628518117,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779349903401
+  },
+  {
+    "type": "LCP",
+    "value": 1168,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779349903554
+  },
+  {
+    "type": "jsError",
+    "message": "Uncaught ReferenceError: undefinedVar is not defined",
+    "filename": "http://localhost:3001/",
+    "lineno": 104,
+    "colno": 25,
+    "stack": "ReferenceError: undefinedVar is not defined\n    at HTMLButtonElement.<anonymous> (http://localhost:3001/:104:25)",
+    "timestamp": 1779349912945
+  },
+  {
+    "type": "FID",
+    "value": 8,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779349912960
+  },
+  {
+    "type": "resourceError",
+    "message": "加载 IMG 失败: https://example.com/this-image-does-not-exist.jpg",
+    "filename": "https://example.com/this-image-does-not-exist.jpg",
+    "timestamp": 1779349913571
+  },
+  {
+    "type": "promiseError",
+    "message": "这是一个未处理的 Promise 错误",
+    "timestamp": 1779349913586
+  },
+  {
+    "type": "LCP",
+    "value": 92,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779350371780
+  },
+  {
+    "type": "jsError",
+    "message": "Uncaught ReferenceError: undefinedVar is not defined",
+    "filename": "http://localhost:3001/",
+    "lineno": 104,
+    "colno": 25,
+    "stack": "ReferenceError: undefinedVar is not defined\n    at HTMLButtonElement.<anonymous> (http://localhost:3001/:104:25)",
+    "timestamp": 1779349912945
+  },
+  {
+    "type": "FID",
+    "value": 8,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779349912960
+  },
+  {
+    "type": "resourceError",
+    "message": "加载 IMG 失败: https://example.com/this-image-does-not-exist.jpg",
+    "filename": "https://example.com/this-image-does-not-exist.jpg",
+    "timestamp": 1779349913571
+  },
+  {
+    "type": "promiseError",
+    "message": "这是一个未处理的 Promise 错误",
+    "timestamp": 1779349913586
+  },
+  {
+    "type": "LCP",
+    "value": 84,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779350374633
+  },
+  {
+    "type": "LCP",
+    "value": 440,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779350374828
+  },
+  {
+    "type": "jsError",
+    "message": "Uncaught ReferenceError: undefinedVar is not defined",
+    "filename": "http://localhost:3001/",
+    "lineno": 104,
+    "colno": 25,
+    "stack": "ReferenceError: undefinedVar is not defined\n    at HTMLButtonElement.<anonymous> (http://localhost:3001/:104:25)",
+    "timestamp": 1779351272524
+  },
+  {
+    "type": "FID",
+    "value": 16,
+    "pageUrl": "http://localhost:3001/",
+    "timestamp": 1779351272538
+  },
+  {
+    "type": "promiseError",
+    "message": "这是一个未处理的 Promise 错误",
+    "timestamp": 1779351273060
+  },
+  {
+    "type": "resourceError",
+    "message": "加载 IMG 失败: https://example.com/this-image-does-not-exist.jpg",
+    "filename": "https://example.com/this-image-does-not-exist.jpg",
+    "timestamp": 1779351273231
+  }
+]

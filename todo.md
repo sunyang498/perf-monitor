@@ -116,31 +116,49 @@
 
 ---
 
+## ✅ 新增已完成（P0/P1/P2）
+
+### 13. 全链路串联
+**文件：** `src/index.ts` / `metrics.ts` / `error.ts`
+
+| 维度 | 内容 |
+|---|---|
+| **为何做** | 采集模块只 `console.log`，数据未进入队列→发送链路。 |
+| **如何做** | `init()` 中 `setupQueue` → `createSender` → `onFlush` 注入。`metrics.ts`/`error.ts` 直接 import `addToQueue(item)` 替换 `console.log`。 |
+| **效果** | 采集 → 入队 → 批量 flush → 双通道发送 → 服务端，全链路闭环。 |
+
+### 14. 页面卸载兜底
+**文件：** `src/core/unload.ts`
+
+| 维度 | 内容 |
+|---|---|
+| **为何做** | 用户关闭标签页时 `setInterval` 失效，队列数据可能丢失。 |
+| **如何做** | `visibilitychange`（隐藏时 flush）+ `pagehide`（卸载时 flush），`flushed` 标记防重复。恢复可见时重置标记。 |
+| **效果** | 页面关闭/切 Tab 时立即触发队列 flush。 |
+
+### 15. Node.js 上报接收服务
+**文件：** `server/index.js`
+
+| 维度 | 内容 |
+|---|---|
+| **为何做** | 全链路闭环需要接收端；面试演示需要数据源。 |
+| **如何做** | Express（ES 模块版），`POST /report` 接收 JSON 追加写入 `data.json`；`GET /report/data` 返回全部数据。 |
+| **效果** | `node server/index.js` 启动，SDK 数据实时落盘。 |
+
+### 18. IndexedDB 离线队列 + 弱网状态机
+**文件：** `src/transport/storage.ts` / `sender.ts` / `index.ts`
+
+| 维度 | 内容 |
+|---|---|
+| **为何做** | 网络不可靠 + 页面随时关闭 → 数据在异步间隙丢失。需要持久化 + 补发机制。 |
+| **如何做** | `storage.ts`：Promise 封装 IndexedDB（openDB/saveToDB/loadAllFromDB/clearDB），单例缓存连接，事务 oncomplete resolve。`sender.ts`：改造为 async 状态机——成功 → 补发 DB 残留 → 清 DB；重试耗尽 → 写 DB + sendBeacon。`index.ts`：init 时 `isDBSupported()` 检测，有残留推入队列补发。 |
+| **效果** | 离线/断网数据不丢失，下次打开自动补发。涉及异步事务、状态机设计、流量协调——项目最有工程深度的模块。 |
+
+---
+
 ## 🔲 待完成的模块
 
-### 🔴 优先级 P0（核心链路闭环）
-
-#### 13. 串联 index.ts：将队列和发送器接入 init
-**文件：** `src/index.ts`
-
-| 维度 | 内容 |
-|---|---|
-| **为何做** | 当前 `metrics.ts` 和 `error.ts` 只 `console.log`，数据没有进入队列→发送链路。 |
-| **如何做** | 在 `init()` 中：① `setupQueue(config)` 初始化队列；② `createSender(config)` 创建发送器；③ `onFlush(sender)` 将发送函数注入队列；④ 修改 `metrics.ts`/`error.ts` 接收一个上报回调参数（或直接 import `addToQueue`），替换 `console.log`。 |
-| **效果** | 采集 → 入队 → 批量发送 → 服务端接收，全链路闭环。 |
-| **预估行数** | ~20 行修改 |
-
-#### 14. 页面卸载兜底
-**文件：** `src/index.ts` 或新建 `src/core/unload.ts`
-
-| 维度 | 内容 |
-|---|---|
-| **为何做** | 用户关闭标签页时，队列中可能还有未发送的数据。`setInterval` 已失效，必须立即 flush。 |
-| **如何做** | 监听 `visibilitychange`（页面隐藏）和 `pagehide`（页面卸载），触发 `queue.flush()` 立即发送。若 `sendBeacon` 也失败，将数据 `JSON.stringify` 写入 `sessionStorage`，下次页面加载时检测并补发。 |
-| **效果** | 页面关闭不丢数据，sessionStorage 补偿极端场景。 |
-| **预估行数** | ~50 行 |
-
-### 🟡 优先级 P1（服务端 + 可视化）
+### 🟡 优先级 P1（可视化）
 
 #### 15. Node.js 上报接收服务
 **文件：** `server/index.js`
@@ -169,29 +187,19 @@
 
 | 维度 | 内容 |
 |---|---|
-| **为何做** | 长任务（>50ms 阻塞主线程）是 FID 恶化的根因。监控长任务是性能诊断的核心手段，且面试官大多不了解这个 API，属于差异化亮点。 |
-| **如何做** | `PerformanceObserver` 监听 `longtask`，`buffered: true`。`entry.duration` 为阻塞时长，`entry.attribution[0]` 可追溯导致长任务的脚本 URL 和容器（iframe）。 |
-| **效果** | 定位"页面为什么卡"的具体代码位置，配合 FID 形成因果链。 |
+| **为何做** | 长任务（>50ms 阻塞主线程）是 FID 恶化的根因。PerformanceObserver `longtask` 类型面试官大多不了解，差异化亮点。 |
+| **如何做** | `PerformanceObserver` 监听 `longtask`，`buffered: true`。`entry.duration` 阻塞时长，`entry.attribution[0]` 追溯脚本来源。 |
+| **效果** | 定位"页面为什么卡"，配合 FID 形成因果链。 |
 | **预估行数** | ~40 行 |
-
-#### 18. 离线队列持久化（IndexedDB）
-**文件：** `src/transport/storage.ts`
-
-| 维度 | 内容 |
-|---|---|
-| **为何做** | 内存队列页面关闭即丢失，用户离线时数据全部浪费。IndexedDB 做持久化是前端存储中最有技术含量的方案，能体现异步事务模型的理解深度。 |
-| **如何做** | 封装 IndexedDB 操作：`openDB` → `saveToDB(items)` → `loadFromDB()` → `clearDB()`。写入策略：每次 flush 成功后清除对应数据；失败则保留。恢复策略：`init()` 时检测 DB 是否有未发送数据，有则补发。存储上限：LRU 淘汰或按时间清理。 |
-| **效果** | 离线/关闭页面不丢数据，下次打开自动补发。面试能聊 IndexedDB 事务、游标、版本迁移。 |
-| **预估行数** | ~80 行 |
 
 #### 19. 数据采样
 **文件：** `src/transport/sampler.ts`
 
 | 维度 | 内容 |
 |---|---|
-| **为何做** | 大流量站点不可能 100% 上报，需要采样降低服务端压力，同时保证统计有效性。 |
-| **如何做** | 哈希采样：用 `hash(userId + pageUrl) % 100 < sampleRate` 决定是否上报，保证同一用户始终在同一采样组（不会忽上忽不上）。分层策略：关键错误 100% 上报，性能指标可配置（如 10%）。 |
-| **效果** | 服务端数据量可控，统计采样结果可外推全量数据。 |
+| **为何做** | 大流量站点不可能 100% 上报，需要采样降低服务端压力。 |
+| **如何做** | 哈希采样：`hash(userId + pageUrl) % 100 < sampleRate`，保证同用户始终在同一采样组。分层：关键错误 100% 上报，性能指标可配置。 |
+| **效果** | 服务端数据量可控，采样结果可统计外推。 |
 | **预估行数** | ~40 行 |
 
 ### 🟢 优先级 P3（文档与完善）
@@ -214,9 +222,11 @@
 | 工程化 + 类型体系 | 3 | ~200 | ✅ 完成 |
 | 核心采集（LCP/FID/CLS + 错误） | 6 | ~180 | ✅ 完成 |
 | 上报体系（队列 + 发送器 + 工具） | 3 | ~80 | ✅ 完成 |
-| **P0 闭环串联 + 卸载兜底** | **2** | **~70** | 🔲 待做 |
-| **P1 服务端 + 可视化** | **2** | **~150** | 🔲 待做 |
-| **P2 长任务 + IndexedDB + 采样** | **3** | **~160** | 🔲 待做 |
+| P0 闭环串联 + 卸载兜底 | 2 | ~70 | ✅ 完成 |
+| P1 服务端 | 1 | ~50 | ✅ 完成 |
+| IndexedDB 离线队列 + 弱网状态机 | 1 | ~120 | ✅ 完成 |
+| **P1 可视化面板** | **1** | **~100** | 🔲 待做 |
+| **P2 长任务 + 采样** | **2** | **~80** | 🔲 待做 |
 | **P3 README** | **1** | **N/A** | 🔲 待做 |
 
-**当前已写：~340 行 | 全量预估：~720 行**
+**当前已写：~480 行 | 全量预估：~660 行**

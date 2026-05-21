@@ -32,3 +32,14 @@ export function flush(): void {
     queue.length = 0;
     flushCallback?.(snapshot);
 }
+
+/**
+ * 取出队列中所有数据并清空，返回快照。
+ * 供页面卸载时使用——不经过异步 sender，直接由调用方处理。
+ */
+export function drainQueue(): TransportItem[] {
+    if (queue.length === 0) return [];
+    const snapshot: TransportItem[] = [...queue];
+    queue.length = 0;
+    return snapshot;
+}

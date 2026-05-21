@@ -1,9 +1,10 @@
 import type { PerfMonitorConfig } from './types';
 import { observeLCP, observeFID, observeCLS } from './core/metrics';
 import { listenJSError, listenPromiseError, listenResourceError } from './core/error';
-import { setupQueue, onFlush, flush } from './transport/queue';
+import { setupQueue, onFlush, addToQueue, flush, drainQueue } from './transport/queue';
 import { createSender } from './transport/sender';
 import { setupUnload } from './core/unload';
+import { loadAllFromDB, isDBSupported, saveToDB } from './transport/storage';
 
 let config: PerfMonitorConfig | null = null;
 let initialized = false;
@@ -32,12 +33,39 @@ function init(userConfig: PerfMonitorConfig): void {
     initialized = true;
     console.log('[perf-monitor] ✅ 初始化完成，配置:', config);
 
-    setupQueue(config)
-    const sender = createSender(config)
-    onFlush(sender)
-    setupUnload(flush)
+    setupQueue(config);
+    const send = createSender(config);
+    onFlush(send);
 
-    observeLCP()
+    // 正常 flush：走完整 sender 异步流程（有重试）
+    // 快速 flush：pagehide 时直接 drainQueue → 写 DB → sendBeacon
+    setupUnload(flush, () => {
+        const snapshot = drainQueue();
+        if (snapshot.length === 0 || !config) return;
+        saveToDB(snapshot).catch(() => {});
+        const body = JSON.stringify(snapshot);
+        navigator.sendBeacon?.(config.url, body);
+    });
+
+    // 检测 IndexedDB 中是否有上次未发送的残留数据，有则补发
+    if (isDBSupported()) {
+        loadAllFromDB()
+            .then((staleItems) => {
+                if (staleItems.length > 0) {
+                    console.log(
+                        `[perf-monitor] 📦 检测到 ${staleItems.length} 条离线数据，加入发送队列`,
+                    );
+                    for (const item of staleItems) {
+                        addToQueue(item);
+                    }
+                }
+            })
+            .catch((e) => {
+                console.warn('[perf-monitor] 离线数据读取失败:', e);
+            });
+    }
+
+    observeLCP();
     observeFID()
     observeCLS()
     listenJSError()
