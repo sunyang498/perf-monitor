@@ -18,6 +18,8 @@ export interface PerfMonitorConfig {
     flushInterval?: number;
     /** 相同错误去重的时间窗口（毫秒），默认 10000 */
     errorDedupWindow?: number;
+    /** 数据采样率（0-1），默认 1（100%上报）。例如 0.5 表示只采集 50% 的性能指标数据，错误始终 100% 上报 */
+    sampleRate?: number;
 }
 
 // ============================================================
@@ -78,3 +80,20 @@ export type ItemKind = 'metric' | 'error';
 
 /** 队列刷新时的回调 */
 export type FlushCallback = (items: TransportItem[]) => void;
+
+// ============================================================
+// 采样相关
+// ============================================================
+
+/**
+ * 采样器接口，由 createSampler() 工厂函数创建。
+ * 判断一条数据是否应被采集上报——错误始终 true，性能指标按 sampleRate 判定。
+ */
+export interface Sampler {
+    /**
+     * 判断一条数据是否应该被采集上报。
+     * - 错误数据始终返回 true（100% 上报）
+     * - 性能指标按 sampleRate 判定
+     */
+    shouldSample: (item: TransportItem) => boolean;
+}
