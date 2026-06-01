@@ -12,6 +12,15 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 #context
 context/
 
+# 忽略项目中所有 .md 后缀文件
+*.md
+
+# 放行README.md
+!README.md
+
+#忽略根目录下的html文件
+/*.html
+
 # Runtime data
 pids
 *.pid

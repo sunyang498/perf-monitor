@@ -29,7 +29,7 @@
 │  ┌──────────────────────┴───────────────────────────────┐   │
 │  │          双通道发送器 (sender.ts)                      │   │
 │  │  fetch+keepalive (可重试) ←→ sendBeacon (兜底)        │   │
-│  │  错误去重 · 重试3次 · IndexedDB离线持久化              │   │
+│  │  错误去重 · 重试3次 · 周期轮询补发 · IndexedDB持久化   │   │
 │  └──────────────────────┬───────────────────────────────┘   │
 ├─────────────────────────┼───────────────────────────────────┤
 │  兜底层                                                    │
@@ -58,6 +58,20 @@ PerfMonitor.init({
     errorDedupWindow: 10000 // 10秒内相同错误去重
 });
 </script>
+
+<!-- 可选采样配置示例 -->
+```html
+<script>
+PerfMonitor.init({
+    url: 'http://localhost:3001/report',
+    batchSize: 5,
+    flushInterval: 5000,
+    errorDedupWindow: 10000,
+    sampleRate: 1.0,       // 0~1，默认 1（100% 采集），性能指标按比例采样，错误 100% 上报
+    debug: false           // 可选：开启后在开发模式输出采样过滤的调试日志
+});
+</script>
+```
 ```
 
 ## 📊 核心功能
@@ -84,7 +98,16 @@ PerfMonitor.init({
 - **双通道发送**：`fetch + keepalive`（可重试3次）+ `sendBeacon`（兜底）
 - **错误去重**：`Map<type+message, timestamp>` 记录最近发送时间，窗口内跳过
 - **离线持久化**：发送失败 → IndexedDB → 下次打开自动补发
+- **服务端重联自动补发**：`setInterval` 周期轮询（每10s），服务端恢复后自动补发 DB 数据
 - **页面卸载兜底**：`pagehide` 时同步写 IndexedDB + `sendBeacon`
+
+### 采样策略（sampleRate）
+
+- `sampleRate`：用户可通过 `PerfMonitor.init({ sampleRate: 0.5 })` 配置 0~1 之间的采样比例，默认 `1`（全量采集）。
+- 错误类数据（`jsError` / `resourceError` / `promiseError`）始终 100% 上报，不参与采样。
+- 性能指标（LCP / FID / CLS）按哈希分层采样，使用 `sessionId:pageUrl:metricType` 作为哈希键，保证同一页面会话内同类指标采样结果一致。
+- 离线回放（IndexedDB 补发）绕过采样器（`replayFromDB()`），保证历史已采样的数据不会被二次过滤丢失。
+
 
 ## 🗂️ 项目结构
 
@@ -103,7 +126,8 @@ perf-monitor/
 │   ├── types/
 │   │   └── index.ts          # 公共类型定义
 │   └── utils/
-│       └── helper.ts         # 类型守卫
+│       ├── helper.ts         # 类型守卫
+│       └── sampler.ts        # 采样器（createSampler / Sampler 接口）
 ├── server/
 │   └── index.js              # Express 接收服务
 ├── test/
