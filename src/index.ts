@@ -1,5 +1,5 @@
 import type { PerfMonitorConfig } from './types';
-import { observeLCP, observeFID, observeCLS } from './core/metrics';
+import { observeLCP, observeFID, observeCLS, observeLongTask } from './core/metrics';
 import { listenJSError, listenPromiseError, listenResourceError } from './core/error';
 import { setupQueue, onFlush, addToQueue, flush, drainQueue, setSampler, replayFromDB } from './transport/queue';
 import { createSender } from './transport/sender';
@@ -31,6 +31,9 @@ function init(userConfig: PerfMonitorConfig): void {
         flushInterval: userConfig.flushInterval ?? 5000,
         errorDedupWindow: userConfig.errorDedupWindow ?? 10000,
         sampleRate: userConfig.sampleRate ?? 1,
+        longTaskThreshold: userConfig.longTaskThreshold ?? 50,
+        longTaskRateLimit: userConfig.longTaskRateLimit,
+        debug: userConfig.debug ?? false,
     };
     initialized = true;
     console.log('[perf-monitor] ✅ 初始化完成，配置:', config);
@@ -74,6 +77,7 @@ function init(userConfig: PerfMonitorConfig): void {
     observeLCP();
     observeFID();
     observeCLS();
+    observeLongTask(config);
     listenJSError();
     listenPromiseError();
     listenResourceError();

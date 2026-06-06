@@ -20,25 +20,33 @@ export interface PerfMonitorConfig {
     errorDedupWindow?: number;
     /** 数据采样率（0-1），默认 1（100%上报）。例如 0.5 表示只采集 50% 的性能指标数据，错误始终 100% 上报 */
     sampleRate?: number;
+    /** 长任务判定阈值（毫秒），默认 50。entry.duration > 此值才视为长任务并上报 */
+    longTaskThreshold?: number;
+    /** 长任务每分钟最大上报条数，默认无限制。用于控制 LongTask 高频触发场景的下数据量 */
+    longTaskRateLimit?: number;
+    /** 是否开启调试日志，默认 false。开启后会在控制台输出采样过滤、归因等调试信息 */
+    debug?: boolean;
 }
 
 // ============================================================
 // 性能指标相关
 // ============================================================
 
-/** 我们关心的三种核心性能指标 */
-export type MetricType = 'LCP' | 'FID' | 'CLS';
+/** 我们关心的核心性能指标 */
+export type MetricType = 'LCP' | 'FID' | 'CLS' | 'LongTask';
 
 /** 一条性能指标的标准化数据结构 */
 export interface MetricData {
     /** 指标类型 */
     type: MetricType;
-    /** 指标值（LCP/FID 单位 ms，CLS 无单位） */
+    /** 指标值（LCP/FID/LongTask 单位 ms，CLS 无单位） */
     value: number;
     /** 指标发生的页面 URL */
     pageUrl: string;
     /** 采集时间戳（毫秒） */
     timestamp: number;
+    /** 扩展元数据，如 LongTask 的归因信息等。向后兼容，可选字段 */
+    meta?: Record<string, unknown>;
 }
 
 // ============================================================

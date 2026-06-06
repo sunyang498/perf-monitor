@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据采样模块 — 手动测试</title>
+    <style>
+        :root {
+            --bg: #1a1a2e;
+            --card: #16213e;
+            --accent: #0f3460;
+            --text: #e0e0e0;
+            --green: #4caf84;
+            --red: #e0556a;
+            --yellow: #d4a843;
+            --blue: #5b9bd5;
+            --border: #2a3a5c;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        h1 {
+            font-size: 1.6em;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+        h2 {
+            font-size: 1.15em;
+            color: var(--blue);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 6px;
+            margin: 24px 0 12px;
+        }
+
+        /* ====== 控制面板 ====== */
+        .control-panel {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: flex-end;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin: 16px 0;
+        }
+
+        .control-group { display: flex; flex-direction: column; gap: 4px; }
+        .control-group label { font-size: 0.8em; color: #999; }
+        .control-group select,
+        .control-group input {
+            background: var(--accent);
+            color: #fff;
+            border: 1px solid var(--border);
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 0.95em;
+        }
+
+        .btn {
+            padding: 10px 22px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.95em;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+        .btn-primary { background: var(--blue); color: #fff; }
+        .btn-primary:hover { opacity: 0.85; }
+        .btn-danger { background: var(--red); color: #fff; }
+        .btn-success { background: var(--green); color: #fff; }
+        .btn-warning { background: var(--yellow); color: #1a1a2e; }
+
+        /* ====== 状态指示 ====== */
+        .status-bar {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin: 12px 0;
+        }
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9em;
+        }
+        .dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .dot-on { background: var(--green); box-shadow: 0 0 6px var(--green); }
+        .dot-off { background: #555; }
+
+        /* ====== 卡片网格 ====== */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+        }
+        .card h3 { font-size: 1em; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+
+        /* ====== 日志面板 ====== */
+        .log-panel {
+            background: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            max-height: 360px;
+            overflow-y: auto;
+            font-family: 'Cascadia Code', 'Fira Code', monospace;
+            font-size: 0.82em;
+            line-height: 1.5;
+        }
+        .log-entry { padding: 3px 0; border-bottom: 1px solid #1a2030; }
+        .log-metric { color: var(--blue); }
+        .log-error { color: var(--red); }
+        .log-skip { color: #666; font-style: italic; }
+        .log-flush { color: var(--green); }
+        .log-time { color: #888; font-size: 0.8em; margin-right: 8px; }
+
+        /* ====== 统计数字 ====== */
+        .stat-row { display: flex; justify-content: space-between; margin: 6px 0; font-size: 0.9em; }
+        .stat-val { font-weight: 700; font-variant-numeric: tabular-nums; }
+        .stat-collected { color: var(--green); }
+        .stat-skipped { color: var(--red); }
+        .stat-total { color: #fff; }
+
+        /* ====== 原理图 ====== */
+        .flow-diagram {
+            font-family: monospace;
+            white-space: pre;
+            font-size: 0.72em;
+            color: #aaa;
+            line-height: 1.35;
+            background: #0a0a14;
+            padding: 10px;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+
+        .hint {
+            background: #1a2a1a;
+            border-left: 3px solid var(--green);
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            margin: 8px 0;
+        }
+
+        .warning {
+            background: #2a1a1a;
+            border-left: 3px solid var(--red);
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            margin: 8px 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>🧪 数据采样模块 — 手动测试</h1>
+    <p style="color:#888;font-size:0.9em;">
+        验证 <code>sampleRate</code> 配置下：错误始终 100% 上报，性能指标按比例采样，同 session 同类指标采样一致性。
+    </p>
+
+    <!-- ====== 控制面板 ====== -->
+    <div class="control-panel">
+        <div class="control-group">
+            <label>🔧 采样率 sampleRate</label>
+            <select id="sampleRateSelect">
+                <option value="1">1 — 全量采集（默认）</option>
+                <option value="0.5" selected>0.5 — 50% 采样</option>
+                <option value="0">0 — 仅采集错误</option>
+            </select>
+        </div>
+        <button class="btn btn-primary" onclick="initSDK()">🔄 重新初始化 SDK</button>
+        <div class="status-bar">
+            <span class="status-item"><span class="dot" id="sdkDot"></span><span id="sdkStatus">未初始化</span></span>
+            <span class="status-item"><span id="sampleRateDisplay" style="font-weight:700;color:var(--yellow);"></span></span>
+        </div>
+    </div>
+
+    <!-- ====== 触发按钮 + 统计 ====== -->
+    <div class="grid">
+        <!-- 触发按钮区 -->
+        <div class="card">
+            <h3>🎯 触发事件</h3>
+            <p style="font-size:0.8em;color:#999;margin-bottom:12px;">点击按钮触发对应事件，观察下方日志中的采样判定</p>
+
+            <button class="btn btn-primary" style="width:100%;margin-bottom:6px;" onclick="triggerMetric('LCP')">
+                📏 触发 LCP（模拟性能指标）
+            </button>
+            <button class="btn btn-primary" style="width:100%;margin-bottom:6px;" onclick="triggerMetric('FID')">
+                ⏱ 触发 FID（模拟性能指标）
+            </button>
+            <button class="btn btn-primary" style="width:100%;margin-bottom:6px;" onclick="triggerMetric('CLS')">
+                📐 触发 CLS（模拟性能指标）
+            </button>
+            <hr style="border-color:var(--border);margin:10px 0;">
+            <button class="btn btn-danger" style="width:100%;margin-bottom:6px;" onclick="triggerError('jsError')">
+                💥 触发 JS 错误
+            </button>
+            <button class="btn btn-danger" style="width:100%;margin-bottom:6px;" onclick="triggerError('promiseError')">
+                ⚡ 触发 Promise 异常
+            </button>
+            <button class="btn btn-danger" style="width:100%;margin-bottom:6px;" onclick="triggerError('resourceError')">
+                🖼 触发资源错误
+            </button>
+            <hr style="border-color:var(--border);margin:10px 0;">
+            <button class="btn btn-warning" style="width:100%;" onclick="resetStats()">
+                🗑 清空日志 & 重置统计
+            </button>
+        </div>
+
+        <!-- 统计面板 -->
+        <div class="card">
+            <h3>📊 实时统计</h3>
+            <div class="stat-row"><span>总计触发</span><span class="stat-val stat-total" id="statTotal">0</span></div>
+            <div class="stat-row"><span style="color:var(--green);">✅ 被采集</span><span class="stat-val stat-collected" id="statCollected">0</span></div>
+            <div class="stat-row"><span style="color:var(--red);">❌ 被跳过</span><span class="stat-val stat-skipped" id="statSkipped">0</span></div>
+            <hr style="border-color:var(--border);margin:8px 0;">
+            <div class="stat-row"><span style="color:var(--blue);">📏 指标-采集</span><span id="metricCollected">0</span></div>
+            <div class="stat-row"><span style="color:#666;">📏 指标-跳过</span><span id="metricSkipped">0</span></div>
+            <div class="stat-row"><span style="color:var(--red);">💥 错误-采集</span><span id="errorCollected">0</span></div>
+            <div class="stat-row"><span style="color:#666;">💥 错误-跳过</span><span id="errorSkipped">0</span></div>
+            <hr style="border-color:var(--border);margin:8px 0;">
+            <div class="stat-row"><span>🔗 上报批次</span><span id="flushCount">0</span></div>
+            <div class="stat-row"><span>📦 总上报条数</span><span id="sentTotal">0</span></div>
+
+            <div id="consistencyNote" style="margin-top:10px;font-size:0.8em;color:var(--yellow);"></div>
+        </div>
+    </div>
+
+    <!-- ====== 原理说明 ====== -->
+    <div class="card" style="margin-top:16px;">
+        <h3>🔍 采样原理（当前页面）</h3>
+        <div class="flow-diagram" id="flowDiagram">
+  正在初始化...
+        </div>
+        <div class="hint" id="flowHint" style="margin-top:10px;"></div>
+    </div>
+
+    <!-- ====== 日志面板 ====== -->
+    <h2>📋 采样判定日志</h2>
+    <div class="log-panel" id="logPanel">
+        <div class="log-entry" style="color:#666;">等待 SDK 初始化...</div>
+    </div>
+
+    <!-- 引入打包后的 SDK -->
+    <script src="../dist/perf-monitor.js"></script>
+    <script>
+        // ============================================================
+        // 页面级统计
+        // ============================================================
+        const stats = {
+            total: 0, collected: 0, skipped: 0,
+            metricCollected: 0, metricSkipped: 0,
+            errorCollected: 0, errorSkipped: 0,
+            flushCount: 0, sentTotal: 0,
+            // 一致性验证：记录首个同类型同 URL 的判定结果
+            firstLCP: null, firstFID: null, firstCLS: null,
+        };
+
+        function resetStats() {
+            Object.keys(stats).forEach(k => { stats[k] = (typeof stats[k] === 'number') ? 0 : null; });
+            stats.firstLCP = null; stats.firstFID = null; stats.firstCLS = null;
+            document.getElementById('logPanel').innerHTML = '';
+            updateStats();
+            addLog('system', '🗑 统计与日志已清空');
+        }
+
+        function updateStats() {
+            document.getElementById('statTotal').textContent = stats.total;
+            document.getElementById('statCollected').textContent = stats.collected;
+            document.getElementById('statSkipped').textContent = stats.skipped;
+            document.getElementById('metricCollected').textContent = stats.metricCollected;
+            document.getElementById('metricSkipped').textContent = stats.metricSkipped;
+            document.getElementById('errorCollected').textContent = stats.errorCollected;
+            document.getElementById('errorSkipped').textContent = stats.errorSkipped;
+            document.getElementById('flushCount').textContent = stats.flushCount;
+            document.getElementById('sentTotal').textContent = stats.sentTotal;
+
+            // 一致性提示
+            const notes = [];
+            if (stats.firstLCP !== null) notes.push(`LCP: ${stats.firstLCP ? '✅全采' : '❌全跳'}`);
+            if (stats.firstFID !== null) notes.push(`FID: ${stats.firstFID ? '✅全采' : '❌全跳'}`);
+            if (stats.firstCLS !== null) notes.push(`CLS: ${stats.firstCLS ? '✅全采' : '❌全跳'}`);
+            document.getElementById('consistencyNote').textContent =
+                notes.length > 0 ? '🔒 一致性验证: ' + notes.join(' | ') : '';
+        }
+
+        // ============================================================
+        // 日志系统
+        // ============================================================
+        function addLog(category, msg) {
+            const panel = document.getElementById('logPanel');
+            const time = new Date().toLocaleTimeString('zh-CN', { hour12: false });
+            const cls = {
+                collected: 'log-metric',
+                errorCollected: 'log-error',
+                skipped: 'log-skip',
+                flush: 'log-flush',
+                system: '',
+            }[category] || '';
+
+            const div = document.createElement('div');
+            div.className = 'log-entry ' + cls;
+            div.innerHTML = `<span class="log-time">${time}</span>${msg}`;
+            panel.appendChild(div);
+            panel.scrollTop = panel.scrollHeight;
+
+            // 限制最大行数
+            while (panel.children.length > 200) {
+                panel.removeChild(panel.firstChild);
+            }
+        }
+
+        // ============================================================
+        // 模拟事件（绕过真实 API 直接测采样逻辑）
+        // ============================================================
+        function triggerMetric(type) {
+            if (!window.__sampler) {
+                addLog('system', '⚠️ SDK 未初始化，请先点击"重新初始化 SDK"');
+                return;
+            }
+
+            const pageUrl = window.location.href;
+            const item = { type, value: Math.random() * 1000, pageUrl, timestamp: Date.now() };
+
+            const sampled = window.__sampler.shouldSample(item);
+            stats.total++;
+
+            if (sampled) {
+                stats.collected++;
+                stats.metricCollected++;
+                addLog('collected', `📏 <b>${type}</b> → <span style="color:var(--green);">✅ 被采集</span> (value=${item.value.toFixed(1)})`);
+            } else {
+                stats.skipped++;
+                stats.metricSkipped++;
+                addLog('skipped', `📏 <b>${type}</b> → <span style="color:var(--red);">❌ 被跳过</span> (采样器过滤)`);
+            }
+
+            // 一致性验证
+            if (type === 'LCP' && stats.firstLCP === null) stats.firstLCP = sampled;
+            if (type === 'FID' && stats.firstFID === null) stats.firstFID = sampled;
+            if (type === 'CLS' && stats.firstCLS === null) stats.firstCLS = sampled;
+
+            // 一致性检查：后续结果是否与首次一致
+            if (type === 'LCP' && stats.firstLCP !== null && sampled !== stats.firstLCP) {
+                addLog('system', `⚠️ <b>一致性异常</b>: LCP 首次=${stats.firstLCP}, 本次=${sampled}（同 session 同 URL 下不应变化！）`);
+            }
+            if (type === 'FID' && stats.firstFID !== null && sampled !== stats.firstFID) {
+                addLog('system', `⚠️ <b>一致性异常</b>: FID 首次=${stats.firstFID}, 本次=${sampled}（同 session 同 URL 下不应变化！）`);
+            }
+            if (type === 'CLS' && stats.firstCLS !== null && sampled !== stats.firstCLS) {
+                addLog('system', `⚠️ <b>一致性异常</b>: CLS 首次=${stats.firstCLS}, 本次=${sampled}（同 session 同 URL 下不应变化！）`);
+            }
+
+            updateStats();
+        }
+
+        function triggerError(errType) {
+            if (!window.__sampler) {
+                addLog('system', '⚠️ SDK 未初始化，请先点击"重新初始化 SDK"');
+                return;
+            }
+
+            const item = {
+                type: errType,
+                message: `测试错误: ${errType}`,
+                timestamp: Date.now(),
+            };
+
+            const sampled = window.__sampler.shouldSample(item);
+            stats.total++;
+
+            // 错误理论上永远被采集
+            if (sampled) {
+                stats.collected++;
+                stats.errorCollected++;
+            } else {
+                stats.skipped++;
+                stats.errorSkipped++;
+                addLog('system', `🚨 <b>严重 BUG</b>: ${errType} 被采样器跳过！错误应始终 100% 上报！`);
+            }
+
+            addLog('errorCollected',
+                `💥 <b>${errType}</b> → ` +
+                (sampled
+                    ? '<span style="color:var(--green);">✅ 被采集</span>（错误 100% 上报）'
+                    : '<span style="color:var(--red);">❌ BUG: 被跳过</span>')
+            );
+
+            updateStats();
+        }
+
+        // ============================================================
+        // SDK 初始化
+        // ============================================================
+        function initSDK() {
+            const rate = parseFloat(document.getElementById('sampleRateSelect').value);
+
+            // 更新 UI
+            document.getElementById('sampleRateDisplay').textContent = `sampleRate = ${rate}`;
+
+            if (window.PerfMonitor) {
+                // PerfMonitor.init 内部会创建 sampler 并通过 setSampler 注入
+                // 但我们需要在页面侧也获取 sampler 引用以展示统计
+                // 由于 SDK 不暴露 sampler，我们手动创建一个等价的来做展示
+                window.__sampler = createLocalSampler(rate);
+
+                resetStats();
+                addLog('system', `✅ SDK 已初始化 (sampleRate=${rate})`);
+                addLog('system', rate === 0
+                    ? '💡 当前模式：仅采集错误，性能指标全部跳过'
+                    : rate === 1
+                        ? '💡 当前模式：全量采集，所有数据上报'
+                        : `💡 当前模式：约 ${rate * 100}% 性能指标被采集，错误 100%`);
+
+                updateFlowDiagram(rate);
+                updateSDKStatus(true);
+            } else {
+                addLog('system', '❌ PerfMonitor 未加载，请先执行 npm run build');
+            }
+        }
+
+        function updateSDKStatus(ok) {
+            document.getElementById('sdkDot').className = 'dot ' + (ok ? 'dot-on' : 'dot-off');
+            document.getElementById('sdkStatus').textContent = ok ? 'SDK 就绪' : 'SDK 未加载';
+        }
+
+        // ============================================================
+        // 本地采样器（与 src/utils/sampler.ts 逻辑完全一致，用于页面展示）
+        // ============================================================
+        function createLocalSampler(sampleRate) {
+            const rate = typeof sampleRate === 'number' && !isNaN(sampleRate) ? sampleRate : 1;
+            const clampedRate = Math.max(0, Math.min(1, rate));
+            const sessionId =
+                (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function')
+                    ? crypto.randomUUID()
+                    : Math.random().toString(36).substring(2, 10) || Date.now().toString(36);
+
+            window.__sessionId = sessionId; // 暴露给原理图使用
+            window.__clampedRate = clampedRate;
+
+            function djb2Hash(str) {
+                let hash = 5381;
+                for (let i = 0; i < str.length; i++) {
+                    hash = ((hash << 5) + hash) + str.charCodeAt(i);
+                }
+                return hash >>> 0;
+            }
+
+            function isError(item) {
+                return item.type === 'jsError' || item.type === 'promiseError' || item.type === 'resourceError';
+            }
+
+            function shouldSample(item) {
+                if (isError(item)) return true;
+                if (clampedRate >= 1) return true;
+                if (clampedRate <= 0) return false;
+                const key = `${sessionId}:${item.pageUrl || window.location.href}:${item.type}`;
+                const hash = djb2Hash(key);
+                const threshold = Math.round(clampedRate * 100);
+                return (hash % 100) < threshold;
+            }
+
+            return { shouldSample };
+        }
+
+        // ============================================================
+        // 原理图更新
+        // ============================================================
+        function updateFlowDiagram(rate) {
+            const sid = window.__sessionId || '(sessionId)';
+            const url = window.location.href.substring(0, 60) + '...';
+            const cr = window.__clampedRate || rate;
+            const threshold = Math.round(cr * 100);
+
+            document.getElementById('flowDiagram').textContent =
+                `  sessionId  = "${sid.substring(0, 18)}..."
+  pageUrl    = "${url}"
+  sampleRate = ${rate}  →  clampedRate = ${cr}  →  threshold = ${threshold} (hash % 100 < ${threshold})
+
+  对每条数据:
+  ┌─────────────────────────────────────────────┐
+  │  if (isError)           → 永远 true (100%)  │
+  │  if (rate >= 1)         → 永远 true (全量)  │
+  │  if (rate <= 0)         → 永远 false (全跳) │
+  │  else:                                      │
+  │    key = sessionId + ":" + pageUrl + ":" + type │
+  │    hash = djb2Hash(key)                     │
+  │    return (hash % 100) < ${threshold}               │
+  └─────────────────────────────────────────────┘`;
+
+            const hint = document.getElementById('flowHint');
+            if (rate === 0) {
+                hint.className = 'warning';
+                hint.textContent = '⚠️ sampleRate=0：所有性能指标（LCP/FID/CLS）都将被跳过，仅错误事件会被采集。试试点击"触发 LCP"和"触发 JS 错误"对比效果。';
+            } else if (rate === 1) {
+                hint.className = 'hint';
+                hint.textContent = '✅ sampleRate=1（默认）：所有数据（指标+错误）全部采集。这是默认行为，向后兼容。';
+            } else {
+                hint.className = 'hint';
+                hint.textContent = `🔀 sampleRate=${rate}：约 ${(rate * 100).toFixed(0)}% 的性能指标被采集。同 session + 同 URL + 同类型指标的判定结果完全一致（要么全采要么全不采），请多次点击同一按钮验证。`;
+            }
+        }
+
+        // ============================================================
+        // 页面初始化
+        // ============================================================
+        window.addEventListener('DOMContentLoaded', () => {
+            initSDK();
+            addLog('system', '🚀 测试页面就绪，请观察上方原理图，然后点击触发按钮开始测试');
+            addLog('system', '📌 关键观察点：多次点击同一指标按钮 → 结果始终一致（哈希一致性）');
+            addLog('system', '📌 关键观察点：切换 sampleRate 后重新初始化 → 错误仍 100% 上报');
+        });
+    </script>
+</body>
+
+</html>
