@@ -108,6 +108,23 @@ PerfMonitor.init({
 - 性能指标（LCP / FID / CLS）按哈希分层采样，使用 `sessionId:pageUrl:metricType` 作为哈希键，保证同一页面会话内同类指标采样结果一致。
 - 离线回放（IndexedDB 补发）绕过采样器（`replayFromDB()`），保证历史已采样的数据不会被二次过滤丢失。
 
+### 长任务监控（LongTask）
+
+- 使用 `PerformanceObserver('longtask')` 事件驱动采集，检测阻塞主线程的任务（默认阈值 `longTaskThreshold = 50ms`）。
+- 归因信息：`entry.attribution` 会写入上报结构的 `MetricData.meta.attribution`，包含 `containerType` / `containerSrc` / `containerId` 等便于定位的字段。
+- 限速：提供 `longTaskRateLimit` 配置用于控制每分钟上报上限（可选），避免高频场景导致后端压力。
+- 兼容性：Chrome 支持 `longtask`；不支持的浏览器会静默降级。
+
+示例：
+```js
+PerfMonitor.init({
+    url: '/report',
+    longTaskThreshold: 100,    // 只上报超过 100ms 的长任务
+    longTaskRateLimit: 20,     // 每分钟最多 20 条 LongTask
+    debug: false
+});
+```
+
 
 ## 🗂️ 项目结构
 
@@ -164,6 +181,27 @@ http://localhost:3001
 - 弱网持久化：停服务 → 触发数据 → 重启服务 → 刷新页面
 - 页面卸载兜底：触发数据 → 直接关闭标签页 → 重新打开 → 检查 IndexedDB
 ```
+
+自动化单元测试（零依赖，CI 友好）：
+
+```bash
+# 采样模块单元测试（109 项）
+node test/sampler.test.js
+
+# 长任务模块单元测试（65 项）
+node test/longtask.test.js
+```
+
+建议将以下脚本加入 `package.json` 的 `scripts`：
+
+```json
+"scripts": {
+    "build": "rollup -c",
+    "test": "node test/sampler.test.js && node test/longtask.test.js"
+}
+```
+
+并在 CI workflow 中运行 `npm ci && npm run build && npm test` 以保证合并时自动回归。
 
 ## 📄 License
 

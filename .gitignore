@@ -18,6 +18,9 @@ context/
 # 放行README.md
 !README.md
 
+#忽略服务端日志
+server/data.json
+
 #忽略根目录下的html文件
 /*.html
 
