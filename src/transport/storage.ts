@@ -166,6 +166,66 @@ export async function loadAllFromDB(): Promise<TransportItem[]> {
 }
 
 // ============================================================
+// ③.5 loadFreshFromDB — 读取存活数据，并清理超过留存期（TTL）的过期数据
+// ============================================================
+
+/**
+ * 读取所有未发送数据，同时清理超过留存期（TTL）的过期记录。
+ *
+ * 设计原因：
+ *   服务端长期不可达时，IndexedDB 会持续堆积数据。TTL 保证：
+ *   ① 存储有界（不无限增长）；② 数据新鲜（过期指标已无意义）；③ 隐私（本地不长期留存）。
+ *
+ * @param maxAgeMs - 数据最大留存时长（毫秒），timestamp < now - maxAgeMs 的记录会被删除
+ * @returns 存活（未过期）数据的扁平数组，按写入顺序（FIFO）排列
+ */
+export async function loadFreshFromDB(maxAgeMs: number): Promise<TransportItem[]> {
+    const db = await openDB();
+    const cutoff = Date.now() - maxAgeMs;
+
+    return new Promise<TransportItem[]>((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, 'readwrite'); // 需要删除过期数据，用 readwrite
+        const store = tx.objectStore(STORE_NAME);
+        const getAllRequest = store.getAll();
+        const expiredIds: Array<number | undefined> = [];
+
+        getAllRequest.onsuccess = () => {
+            const records: PendingRecord[] = getAllRequest.result;
+            const allItems: TransportItem[] = [];
+
+            for (const record of records) {
+                if (record.timestamp < cutoff) {
+                    // 过期记录：标记待删除，不纳入补发
+                    expiredIds.push(record.id);
+                    continue;
+                }
+                allItems.push(...record.items);
+            }
+
+            if (expiredIds.length > 0) {
+                console.warn(
+                    `[perf-monitor] 🧹 TTL 清理 ${expiredIds.length} 条过期数据（留存 ${maxAgeMs}ms）`
+                );
+                // 同一事务内删除过期记录
+                for (const id of expiredIds) {
+                    if (id !== undefined) store.delete(id);
+                }
+            }
+
+            if (allItems.length > 0) {
+                console.log(
+                    `[perf-monitor] IndexedDB 读取到 ${allItems.length} 条待补发数据`
+                );
+            }
+
+            resolve(allItems);
+        };
+
+        getAllRequest.onerror = () => reject(getAllRequest.error);
+    });
+}
+
+// ============================================================
 // ④ clearDB — 清空所有已发送的数据
 // ============================================================
 

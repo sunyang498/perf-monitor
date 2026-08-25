@@ -26,6 +26,14 @@ export interface PerfMonitorConfig {
     longTaskRateLimit?: number;
     /** 是否开启调试日志，默认 false。开启后会在控制台输出采样过滤、归因等调试信息 */
     debug?: boolean;
+    /** 即时重试最大次数（指数退避），默认 3。超过后数据落 IndexedDB，由周期轮询接管 */
+    maxRetries?: number;
+    /** 指数退避基础间隔（毫秒），默认 1000。第 n 次重试延迟 = min(1000 × 2ⁿ, retryMaxDelay) + jitter */
+    retryBaseDelay?: number;
+    /** 指数退避最大间隔（毫秒），默认 4000。防止重试间隔无限增长 */
+    retryMaxDelay?: number;
+    /** 离线数据留存时长（毫秒），默认 7 天。超过该时长的 IndexedDB 数据在补发时自动清理 */
+    dbRetentionMs?: number;
 }
 
 // ============================================================

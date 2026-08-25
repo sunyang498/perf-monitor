@@ -12,7 +12,15 @@
 
 import type { PerfMonitorConfig, TransportItem } from '../types';
 import { isError } from '../utils/helper';
-import { saveToDB, loadAllFromDB, clearDB } from './storage';
+import { saveToDB, loadFreshFromDB, clearDB } from './storage';
+
+/** 通用 sleep：用于指数退避等待 */
+function sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/** 离线数据默认留存时长（7 天）。超过则补发时自动清理 */
+const DEFAULT_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
 
 export function createSender(config: PerfMonitorConfig) {
     const dedupMap = new Map<string, number>();
@@ -67,7 +75,9 @@ export function createSender(config: PerfMonitorConfig) {
         body: string,
         retryCount: number,
     ): Promise<boolean> {
-        if (retryCount >= 3) {
+        const maxRetries = config.maxRetries ?? 3;
+
+        if (retryCount >= maxRetries) {
             console.warn(
                 `[perf-monitor] ❌ fetch 重试 3 次全部失败，数据将写入 IndexedDB`
             );
@@ -116,8 +126,15 @@ export function createSender(config: PerfMonitorConfig) {
                 `[perf-monitor] ⚠️ fetch 第 ${retryCount + 1} 次失败:`,
                 (err as Error).message
             );
-            // 失败则等待后递归重试
-            await new Promise<void>((r) => setTimeout(r, 1000));
+            // 指数退避 + 随机抖动：1s → 2s → 4s ...（封顶 retryMaxDelay）
+            // 设计原因：
+            //   ① 固定间隔会让所有客户端在服务端恢复瞬间同时重试，造成"重连风暴/惊群"
+            //   ② 指数增长给服务端留恢复时间；随机抖动（jitter）进一步打散并发重试
+            const baseDelay = config.retryBaseDelay ?? 1000;
+            const maxDelay = config.retryMaxDelay ?? 4000;
+            const backoff = Math.min(baseDelay * Math.pow(2, retryCount), maxDelay);
+            const jitter = Math.random() * 300;
+            await sleep(backoff + jitter);
             return trySend(url, body, retryCount + 1);
         }
     }
@@ -148,9 +165,12 @@ export function createSender(config: PerfMonitorConfig) {
         retryTimerId = setInterval(async () => {
             console.log('[perf-monitor] 🔍 周期轮询：检查 IndexedDB 是否有待补发数据...');
             try {
-                const stale = await loadAllFromDB();
+                // TTL 过滤：只读取存活数据，并顺带清理超期记录
+                const stale = await loadFreshFromDB(
+                    config.dbRetentionMs ?? DEFAULT_RETENTION_MS
+                );
                 if (stale.length === 0) {
-                    console.log('[perf-monitor] 🔍 周期轮询：DB 为空，停止轮询');
+                    console.log('[perf-monitor] 🔍 周期轮询：DB 无存活数据，停止轮询');
                     stopPeriodicRetry();
                     return;
                 }
@@ -203,7 +223,10 @@ export function createSender(config: PerfMonitorConfig) {
 
     async function replayStaleData(url: string): Promise<void> {
         try {
-            const stale = await loadAllFromDB();
+            // TTL 过滤：只读取存活数据，并顺带清理超期记录
+            const stale = await loadFreshFromDB(
+                config.dbRetentionMs ?? DEFAULT_RETENTION_MS
+            );
             console.log(
                 `[perf-monitor] 📦 replayStaleData: DB 中有 ${stale.length} 条数据`
             );
